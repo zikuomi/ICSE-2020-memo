@@ -1,5 +1,7 @@
 # ICSE 2020 memo
 
+# 6/23 (15 absts)
+
 ## ~I1 Metastudies~
 
 ## <font color="orange"> I2 Security </font> (4 TPs, 2 NIERs)
@@ -142,9 +144,9 @@ DL関連の自動化論文、いわゆるDLを用いたセキュリティの突�
 
 確かに（定義にも依るが）Greybox Fuzzingでは実行同士を区別できない、でも実行のCombinationって何だろ（よもや実行順ではあるまい）
 
-## ~P7 Human Aspects~
+# 6/24 (25 absts, total 40 absts)
 
-## <font color="orange"> P9 Bugs and Repair </font> (3 TRs, 2 Journals, 1 NIER)
+## ~P7 Human Aspects~ 読んじゃった (3 TRs, 2 Journals, 1 NIER)
 
 - Title: What Predicts Software Developers' Productivity? (journal)
 >  
@@ -169,12 +171,260 @@ DL関連の自動化論文、いわゆるDLを用いたセキュリティの突�
 
 - Title: Engineering Gender-Inclusivity into Software: Ten Teams' Tales from the Trenches (paper)
 >  
+背景： **Gender-Inclusivity** がSEの研究者の間で注目されている。 が、提唱されているだけで実践されてはいない。  
+実験： 5か月 ～ 3年半の範囲で50人以上のチーム10個にGenderMagベースのプロセスを収集 → 9つの実践と2つの課題を提示
+
+Gender-Inclusivityってなんじゃらほい
+
+- Title: How does Machine Learning Change Software Development Practices? (journal)
+>  
+背景： **学習機能をシステムに追加すると不確実性が内包される**。 学習機能の追加の効果を調査  
+調査： 26か国で14人へインタビュー、342人から調査回答 → 学習機能の有無で、要件、設計、テスト、スキルの多様性、問題解決などで明らかに差が出た
+
+## <font color="orange"> P9 Bugs and Repair </font> (1 TR, 2 Journals, 2 SEIPs, 1 NIER)
+
+- Title: PRECFIX: Large-Scale Patch Recommendation by Mining Defect-Patch Pairs (practice)
+>  
+背景： パッチのリコメンドはエラーの適切に修正を提案するプロセス。 デバッグと修正の時間削減に効果 → 生産性の向上。 既存研究はテストスイートとデバッグレポートに依存 → 現実世界では欠けることもしばしば  
+提案手法： PRECFIX 過去のデバッグアクションから適切なリコメンドする手法。 クラスタリングによって一般的な再利用可能なパッチパターンを抽出。  
+実装：  
+実験： 様々な欠陥パターンの存在する 10K個のプロジェクトで実験 → 3000のテンプレートを抽出、また高速、FPは22%程度。 **アリババにPRECFIXをロールアウト**
+
+- Title: On the Efficiency of Test Suite based Program Repair: A Systematic Assessment of 16 Automated Repair Systems for Java Programs (paper)
+>  
+背景： テストベースの自動プログラム修正は色々研究有り（テストスイートの近似として応用）。**パッチの正確性に対する研究はあるが、生成の効率性に対する研究は少ない**。   
+調査： 既存のテストスイートベースのプログラム修正技術の効率性に関して調査  → 生成されたパッチの個数に着目 → 探索空間の広さ・パッチ生成までのテスト作業の少なさ・適切なパッチを生成できるか を評価項目
+実験： Java用の16個のOSS修復ツールから生成されたパッチ候補を量的観点で実証 → 現在のテンプレートベース（最も効果的とされている）の修正システムでは無関係なパッチ候補を生成する傾向があるので最低効率となった
+
+パッチの効率についての研究。実をいうと未だにパッチの仕組みが分かっていない。
+
+- Title: SEQUENCER: Sequence-to-Sequence Learning for End-to-End Program Repair (journal)
+>  
+提案手法： SEQUENCER: S2S学習に基づいた新規E2Eアプローチ。 機械学習を用いたコード上のバグ修正、**大きなコードで発生していた無制限の語彙問題を克服**    
+実験： 35578のサンプルでトレーニング、4711の実際のバグ修正と、Defects4JベンチマークでSEQUENCERを評価 → 950/4711で固定ライン（fixed line）(?) を予測、Defects4Jベンチで14のバグパッチを発見
+
+unlimited vocabulary problem って何だろ
+
+- Title: A Study of Bug Resolution Characteristics in Popular Programming Languages (journal)
+>  
+背景： プログラミング言語ごとのバグ解決特性をGithubのプロジェクトから調査（相関関係なので注意）。   
+調査： 主な言語10の600個のプロジェクト、3Mのコミットからバグ解決データを抽出 → 解決時間とパッチサイズが言語間で大きな差が出た。 Rubyは時間がかかるなど。 静的型付け言語ではパッチが横断的になるが、解決までは短い
+
+言語ごとの調査は根が深そう（言語にもバージョンがあるし）。 静的型付け言語では修正時間が短いというのはどこかで引用できそうな予感
+
+- Title: Automated Bug Reproduction from User Reviews for Android Applications (practice)
+>  
+背景： **ユーザーレビューのバグ報告は再現がムズイ** → 自動化できると嬉しい → が、レビューは難解で情報不足
+提案手法： RevRep ユーザレビューからAndroidアプリのバグを再現するツール。 自然言語処理を利用してバグ再現に役立つ情報を抽出  
+実験： Google Play 上の63件のクラッシュ関連のレビューを含むベンチマークを生成 → 人間と同程度のパフォーマンスを実現、70%のレビューを正常に再現
+
+ユーザレビューから再現するのが難しいのは認めるが、70%はにわかに信じがたい。ベンチマークにカラクリがありそう
+
+## P10 Stack Overflow
+
+## ~P11 Natural Language Artifacts~
+
+## <font color="orange"> P12 Testing and Debugging </font> (4 Journals, 2 SEIPs)
+
+- Title: Debugging Crashes using Continuous Contrast Set Mining (practice)
+>  
+背景： Facebook では毎日数百万のレビューが送られ、エンジニアはその中からバグとかリグレッションをチェックしている → 多くは手作業、かつ時間は有限、専門知識と精密なコード検査が必要 （ツライ）  
+提案手法： **Contrast Set Mining** → 判別パターンマイニングの一種 → 連続データの離散化がメイン → 提案：CSMの連続データへの直接適用（No 離散化）  
+実装：  
+実験：挑戦的なデータセット、ユーザナビゲーションのイベントシーケンスへの適用
+
+レビューと連続データって関連付けされるのか？元から離散的なイメージ
+
+- Title: Automatic Abnormal Log Detection by Analyzing Log History for Providing Debugging Insight (practice)
+>  
+背景： ソフトウェアサイズが大きく複雑化すると欠陥の発見はより困難になる → **ログ分析がデバッグの洞察 (Insight) を得る唯一の方法** → 手動だとエラく労働力が必要  
+提案手法： historian ログ分析システム → 統計的テキストマイニングでログ内の重要度とノイズ度を用いて強調表示  
+実装：  
+実験： Tizen Native API テストログに適用 → 平均 4%のログのみ強調 → 実際にTizen開発者へ報告、いいんんじゃない、という評価
+
+強調表示のし損ね（FN）とか冗長（FP）とかがどれだけあるのか気になるところ。対象はTizenのみ？
+
+- Title: Explaining Regressions via Alignment Slicing and Mending (journal)
+>  
+背景： Regression Faults が発生した場合の一般的な作業 1) 障害発生個所の分離 2) 障害発生へのフローの理解 → 障害箇所の特定の既存研究 Dynamic Slicing, Delta Debugging, Symbolic Analysis → 精度やスケーラビリティの問題が依然残る  
+提案手法： トレースベース （Defectがどのように障害へ伝播するのか調査） → **Causality Graph** の構築。 課題１ ２つのプログラムバージョンの各トレースのアライメント（どのように重要な差分を表現するか）。 課題２ **Alignment Slice**, Mending から Causality Graph を構築、障害の説明。  
+実装：  
+実験： Dynamic Slicing, Delta Debugging, 記号実行との比較、検体は２４個のリアル検体 → 障害分離は正確、障害の説明は十分許容コストで理解可能、実行オーバーヘッドを十分抑えられる
+
+障害箇所の特定という意味では徐さんのテーマとの関連性が深そう。検体的にJavaを対象としている？ 実験は豊富、強い
+
+- Title: Historical Spectrum based Fault Localization (journal)
+>  
+背景： **Spectrum Based Fault Localization (SBFL)** は障害特定に効果的と評価、業界でも自動化されたSBFLが評価 → が、制限あり。 スペクトル構築のためのテストカバレッジ情報は障害原因を表現していない、また、SBFLはバグの有無を十分区別できない  
+提案手法： バージョン履歴情報を障害特定に利用する手法 HSFL (Historical Spectrum-based Fault Localization)。 バグを引き起こすコミットを特定 → Historical Spectrum を構築（これを用いて怪しいコード要素をランク付け）  
+実装：  
+実験： Defects4J ベンチマークを用いて 最先端SBFL技術と比較して最大 +77.8% 多くのバグを発見（上位5つで+40.8%）。  
+
+Defects4J結構頻繁に出てくるなぁ（有名なんだろうか）
+
+- Title: Visualizing distributed system executions (journal)
+>  
+背景： 分散システムはログへの課題を提示している。 複数ホストのログからシステムログを構築したり、ホスト間の非同期処理とか色々面倒  
+提案手法：3つのタスクに取り組む手法 1) イベント間の順序の理解 2) ホスト間の相互作用パターンの検索 3) ペア間の構造的な類似点・相違点の識別。 XVector イベント間のHB関係情報をエンコードするツール、 ShiViz 分散システムの実行を時空間で表現  
+実装：  
+実験： 109人の学生の2つの調査と2人の開発者によるケーススタディ → 提案手法が **システム理解** に有用である
+
+分散システムのロギングは確かに面倒くさそう。 本質的にシーケンシャルなログにできないしね。
+
+- Title: An Integration Test Order Strategy to Consider Control Coupling (journal)
+>  
+背景： 統合テストにおいて、既存技術はクラス間の間接関係を考慮していない。   
+提案手法： 統合テストのオーダー戦略。 クラス間の推移関係の概念を拡張 → テストスタブの複雑さを推定  
+
+クラス間の間接関係ってどんなんだ？ 推移律とかの話から A→B（AとBは直接関係） A→B→C（AとCは間接関係） こんな感じ？ それとも動的にクラスが決定すること？（間接ジャンプとかの間接、まあ本質は同じっちゃ同じだが）
+
+## ~A7 Human Aspects 1~
+
+## A8 Machine Learning and Models
+
+## <font color="orange"> A9 Traceability </font> (3 TRs, 1 SEIP, 1 Demo, 1 NIER)
+
+- Title: A Novel Approach to Tracing Safety Requirements and State-Based Design Models (paper)
+>  
+背景： Traceability はソフトウェアとシステムの安全使用の保証において重要 → が、**自動化Traceabilityでは多くのFPが発生し低精度**  
+提案手法： mutant-driven method 新規アイデア：正しいと思われる Trace Targets を積極的に作成しモデルチェックを利用して安全性を自動で検証。 要件のプロパティは mutant に保存 → MCに失敗したらKill → mutant の生死から Traceability link の相関関係を分析する手順も提案  
+実装：  
+実験： 27の要件を持つ2つの自動車システムの評価 → 最先端技術と比較してかなりの精度向上
+
+ここでのmutantはどういう意味だろう
+
+- Title: Establishing Multilevel Test-to-Code Traceability Links (paper)
+>  
+背景： **test -> code の Traceability Links はテストコードとテスト済みコードの同期を保てる** → テスト失敗率と障害の見落とし率が低下（テスト重複を避けつつ未テスト箇所を特定できるから？） ただし、これらは手動でやると負担が大きい  
+提案手法： TCtracer test->code の Traceability Links を自動で確立する手法。 メソッド粒度、クラス粒度の両方で動作 → メソッド・クラス間の相乗的な情報の流れを利用  
+実装：  
+実験： 4つの大規模OSSシステムで評価 → 78%のMAP（Mean Average Precision： 平均精度）でTraceability Linksを確立可能、 テストクラス→クラス間は93%やぞ
+
+なんか大抵はクラスのテストクラスってHogeTestとかになるんじゃ？ → まさかクラス名からリンク張るとかではないな？ メソッド単位のテストリンクをどう張るのかは気になる、あと依存関係にあるクラス間とかどうするのか
+
+- Title: Lack of Adoption of Units of Measurement Libraries: Survey and Anecdotes (practice)
+>  
+背景： **Units of Measurement (UoM)** のライブラリはUnit内の変数を適当にエンコードして変換する → 3700ものライブラリがある、車輪の再発明が起きている、冗長である  
+調査： UoMライブラリについて 3人の開発者と1人の科学者からヒアリング、オンラインアンケートを実施（91人の回答） → UoMライブラリへの不満と既存ライブラリが採用されない理由が判明 → UoMライブラリ製作者へリコメンド
+
+車輪の再発明 (wheel is being reinvented, reinventing the wheel) -> 確立済みの技術を一から再度作ること、つまり冗長な準備の意 （たまに権藤先生が口にしていた）。 既存ライブラリに乗っかるのは常套手段だが、実際には痒い所に手が届かないこと、ありますあります。
+
+- Title: Improving the Effectiveness of Traceability Link Recovery using Hierarchical Bayesian Networks (paper)
+>  
+背景： Traceability は大きな労力と時間がかかり、エラーも発生しやすくなる → 類似度からテキスト内のアーティファクトペア間の関係を描写、自動化するアプローチが研究されてきた → まだ欠点あるでよ、**類似度評価は単一メトリクスじゃ表現できぬ、多様な構造もしくは非構造的まアーティファクトグループ間関係を表現できぬ**  
+提案手法： 確率モデル COMET (hierarchiCal prObabilistic Model for softwarE Traceability) テキストの類似性を複数の尺度で表現しアーティファクト間の関係をモデル化   
+実装：  
+実験：既存手法と比較してデータセット全体で一貫した効果を提示。 主要な通信会社と協力しCometプラグインを開発 → 現場に適用し、実用的との評価
+
+アーティファクトが具体的に何を指すのか（ほかのTraceability論文でもそうだが）
+
+## ~A10 Human Aspects 2~
+
+## <font color="orange"> A11 Performance and Analysis </font> (1 TR, 4 Journals, 1 Demo, 1 NIER)
+
+- Title: Testing with Fewer Resources: An Adaptive Approach to Performance-Aware Test Case Generation (journal)
+>  
+背景： テストケースの自動生成はカバレッジを基準に据えることが多かったが、最近の傾向ではランタイムとメモリも尺度として使われるようになってきた。 **カバレッジに影響を与えずコスト下げられるといいよね**  
+提案手法： aDynaMOSA (adaptive DynaMOSA) テストの実行コストを合理的に見積もるアルゴリズム  
+実装：  
+実験： 110のJavaクラスについて、DynaMOSAと比較してランタイム -25%, ヒープメモリ -15% 程度でテストスイートを生成、7つのカバレッジ基準と同様の障害検出効果を保つ → Not Adaptive では不十分
+
+テストコストを見積もって効率的なテストケース生成をしつつカバレッジ基準は損なわない手法。 テストケース生成に何を使っているのか気になるところ（記号実行とかだとヒープメモリ食いつぶすとかザラなので…）
+
+- Title: What's Wrong with My Benchmark Results? Studying Bad Practices in JMH Benchmarks (journal)
+>  
+背景： パフォーマンステストにおいて、マイクロベンチマークは広く使われる手法。 Java Microbenchmark Harness (JMH) などはきめ細かいテストスイートを作成可能 → が、JVMが複雑なので正確なJMHを記述するのには苦労する  
+調査： **JMHベンチの悪い慣例を経験的に調査** → 5つのプラクティスを自動検出するツールを開発 → 123 の Java-based OSS でそのプラクティスが蔓延（BAD!） → 正確な JMHの記述に苦労していることに起因 → 改善案の提示
+
+ベンチマークの不正（都合よく改変）はまま起こりそうな問題ではある。 悪い方向を調査したのは興味深い
+
+- Title: Towards the Use of the Readily Available Tests from the Release Pipeline as Performance Tests. Are We There Yet? (paper)
+>  
+背景： パフォーマンステストはシステムの環境が整った後にテストされるなど、開発段階でのテストが困難 → 開発中に使用している **Readily Available Tests** (即利用可能テスト) をパフォーマンステストとして機能させられないか？  
+調査： Hadoop、Cassandra から127個のパフォーマンス問題を収集、即利用可能なテストからパフォーマンスを評価 → 多くの問題で解決が可能、しかし役立つ即利用可能テストはごく一部
+
+- Title: ModGuard: Identifying Integrity & Confidentiality Violations in Java Modules (journal)
+>  
+背景： Java9 では Jigsaw （モジュールシステム） が加えられた → internal type の隠蔽を目的としているが、エスケープを防止できない → **意図しないエスケープが発生すると機密性が損なわれる** → が、チェックには複雑な作業が必要  
+提案手法： ModGurad Doop-based の静的分析手法 （エスケープするインスタンスの自動識別ツール）  
+実装：  
+実験： MIC9Benchの適用例からModGuardの有効性と欠点の提示、 Tomcatのケーススタディ → Jigsawには防げない機密インスタンスのエスケープについてModGuardは防止
+
+エスケープ解析の一種っぽい。どちらかというとセキュリティ寄りの論文な気がするが… 比較対象がJigsaw（Java 9）なので言語的な視点も必要そう
+
+- Title: The ORIS Tool: Quantitative Evaluation of Non-Markovian Systems (journal)
+>  
+背景： **ORIS** 分散にも対応する numerical solution tools (数値解法) のJava実装の提供（？） → 特にパフォーマンス効率、信頼性、保守性などの早期評価をサポート  
+
+？ 申し訳ないがいまいちORISが何なのか分らんかった（提案されたものなのか、すでにあるツールの有用性を調査したものなのか）
+
+## <font color="orange"> A12 Testing </font> (2 TRs, 2 Journals, 1 Demo, 1 NIER)
+
+- Title: Practical Fault Detection in Puppet Programs (paper)
+>  
+背景： **Puppet システムのリソースをモデル化・抽象化しセットアップを助ける管理ツール** → 潜在的な問題点 → Puppet自身のリソースが別のリソースに依存している場合にオーダー制約が正確に指定できないとリソースの競合を引き起こしエラーとなる、リソース変更の情報がPuppetへ伝播しないと可用性・機能を低下させる可能性がある  
+提案手法： 上記の問題を特定するアプローチ → Puppetリソースとファイルシステムの相互作用のモデル化 → オーダー制約違反があれば潜在的な障害として報告  
+実装：  
+実験： Puppetの30のモジュールで未知の問題を発見、数秒で分析可能（早い）
+
+リソースのモデル化は非常に厄介な課題の一つ。産業的にこのモデル化をどこまで適用できるのかは分らぬ
+
+- Title: Empirical Assessment of Multimorphic Testing (journal)
+>  
+背景： ソフトウェアシステムのパフォーマンスは機能の正確さに匹敵するほど重要 → が、そのテストの評価についてはまだ議論が足りぬ （テストが十分かや、テスト同士の比較などが十分にはできない）  
+提案手法： **パフォーマンス評価の定量的プロパティについてのテストスイートの「カバレッジ」を定義・評価するフレームワーク** → プロパティはタスクの実行時間、memory usage, テスト成功率など  
+実装：  
+実験： フレームワークを利用して、新しいテストケースがテストスイートに追加する価値があるかを評価。 3つの実証研究を通じて評価（object tracking in videos, object recognition in images, code generation）
+
+パフォーマンステストの評価ってカバレッジが重視される印象ないなぁ（カバレッジを高くしつつメモリ使用量を計測する、とかならわかるけども）
+
+6/25 (* absts, total * absts)
+
+- Title: Learning from, Understanding, and Supporting DevOps Artifacts for Docker (paper)
+>  
 背景：  
 提案手法：  
 実装：  
 実験：
 
-- Title: How does Machine Learning Change Software Development Practices? (journal)
+- Title: Improving Change Prediction Models with Code Smell-Related Information (journal)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+## <font color="orange"> P13 Security </font> (3 TRs, 2 SEIPs)
+
+- Title: Burn After Reading: A Shadow Stack with Microsecond-level Runtime Rerandomization for Protecting Return Addresses (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Automated Identification of Libraries from Vulnerability Data (practice)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Unsuccessful Story about Few Shot Malware-Family Classification and Siamese Network to the Rescue (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: SpecuSym: Speculative Symbolic Execution for Cache Timing Leak Detection (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Building and Maintaining a Third-Party Library Supply Chain for Productive and Secure SGX Enclave Development (practice)
 >  
 背景：  
 提案手法：  
