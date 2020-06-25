@@ -153,7 +153,7 @@ DL関連の自動化論文、いわゆるDLを用いたセキュリティの突�
 背景： 組織が取れるソフトウェア開発者へのサポートは様々（オフィスレイアウトからソースコードクリーンアップまで）  
 調査： どのオプションが生産性に影響を与えるか 3社 622人 の開発者へ調査 → **モチベーションなど非技術的な要因に大きな相関**
 
-ある意味ソ新Gに対するアンチテーゼ
+ある意味グループに対するアンチテーゼ
 
 - Title: A Study on the Prevalence of Human Values in Software Engineering Publications, 2015 – 2018 (paper)
 >  
@@ -378,58 +378,292 @@ Defects4J結構頻繁に出てくるなぁ（有名なんだろうか）
 
 パフォーマンステストの評価ってカバレッジが重視される印象ないなぁ（カバレッジを高くしつつメモリ使用量を計測する、とかならわかるけども）
 
-6/25 (* absts, total * absts)
+# 6/25 (24 absts, total 64 absts)
 
 - Title: Learning from, Understanding, and Supporting DevOps Artifacts for Docker (paper)
 >  
-背景：  
-提案手法：  
-実装：  
-実験：
+背景： DevOps ツールなどの増加によって、コードサポート以上に **ツールサポート（Dockerなどへ）の需要が高まっている。** Dockerなどを解析する支援には課題（不足）がある（ネストされた言語、ルールマイニング、セマティックルールベースの分析）  
+提案手法： binnacle 900,000のGithubレポジトリを取り込めるルールセット → Dockerのビルドエラーを回避、イメージサイズとビルドレイテンシを改善  
+調査： Github上のDocerfileはゴールドセット（何やらランクの高い）に比べて6倍近くルール違反
+
+Dockerについてもあんまりわかっていない（仮想環境っぽいことだと思っている）。産業的には仮想環境はどこまで関心があるのかは要調査
 
 - Title: Improving Change Prediction Models with Code Smell-Related Information (journal)
 >  
-背景：  
-提案手法：  
+背景： **コードの匂い (code smells) はクラス変更に悪影響を与える次善の実装選択**。 コードの匂いに関する情報から、将来どのクラスが変更されるのかを示すモデルのパフォーマンス改善を目指す  
+提案手法： 強度インデックス（においの重大度）を利用  
 実装：  
-実験：
+実験： 既存手法のアンチパターンメトリクスと比較 → 強度モデルのほうがベースラインよりも統計的に優れる、強度モデルがアンチパターンよりも優れた予測を示す。 F値も高い
+
+コードの匂いに関するサーベイっぽい感じ？ 確かバージョン管理関連の話だった気がする
 
 ## <font color="orange"> P13 Security </font> (3 TRs, 2 SEIPs)
 
 - Title: Burn After Reading: A Shadow Stack with Microsecond-level Runtime Rerandomization for Protecting Return Addresses (paper)
 >  
-背景：  
-提案手法：  
+背景： **ROP (Return-oriented Programming)** ret命令を用いたコールスタック制御（return addressの改竄）によるコード再利用攻撃 → 主な対策案 Shadow Stack, CFI, code randomization → 既存のrandomizationは高度なポインタ追跡が必要  
+提案手法： BarRA return address を保護するShadow Stack メカニズム （高度なポインタ追跡を回避） → 抽象的（間接的？）なreturn addressのマッピングをマイクロ秒のオーダーでrandomization  
 実装：  
-実験：
+実験： SPEC CPU2006 の19個のベンチマークで検証、バイナリサイズは微増（ave: +29.44%）、return address保持のために8MBのみ占有、突破率を 1/2^20 程度に下げる、動的オーバーヘッドはshadow Stackと同程度
+
+Shadow Stackだけでは無理なん？と思ってしまった。 Shadow Stackの問題点は本文で指摘されている？ 学生時代だと面白そうな内容（バイナリだし）、が、グループG的にはジャンル違い
 
 - Title: Automated Identification of Libraries from Vulnerability Data (practice)
 >  
-背景：  
-提案手法：  
+背景： Software Composition Analysis (SCA) には脆弱性をデータベースに登録するプロセスがある。 その際、どのライブラリに脆弱性があるのかを特定したいが、それが難しいねんな → 機械学習を用いて特定できないか？  
+提案手法： **extreme multi-label learning (XML)** → FastXML を用いて学習  
 実装：  
-実験：
+実験： NVD (National Vulnerability Database) について検証 → F1@k は 0.53
+
+F値が0.53だとまだ実用化までには課題も多そう。 XMLは初めて知った
 
 - Title: Unsuccessful Story about Few Shot Malware-Family Classification and Siamese Network to the Rescue (paper)
 >  
-背景：  
-提案手法：  
+背景： **マルウェアを機能ごとに分類するファミリー分類** はマルウェア分析において効果的（機械学習ベースが提案） → 課題在り → サンプル数が少ないファミリについては分類パフォーマンスが悪い（精度が低い？）  
+提案手法： 従来のダウンサンプリング → Siamese-Network-basedの分類  
 実装：  
-実験：
+実験： 少数ファミリでは高いパフォーマンスを発揮（可能性あり） → 全体のパフォーマンス向上につながる
+
+問題こそマルウェアだが、論文の内容は少サンプルの分類問題をいかに効率的に学習させるか、ということになってない？ マルウェア固有の要素はあるのだろうか（あるいはただの応用先？）
 
 - Title: SpecuSym: Speculative Symbolic Execution for Cache Timing Leak Detection (paper)
 >  
-背景：  
-提案手法：  
-実装：  
-実験：
+背景： CPUキャッシュに対するタイミングサイドチャネルはタイミングを測定されると間接的にデータをリークする可能性がある → 静的解析によって、投機的実行によってタイミングリークがないことを定性的に確認できる → リークを引き起こす入力などを生成できない（静的解析の限界）  
+提案手法： **Speculative Symbolic Execution** 投機的実行とキャッシュをモデル化し、キャッシュタイミングのリークを定式化  
+実装： KLEE上に実装  
+実験： 14のOSSベンチマークに対して評価 → 4つの異なるキャッシュ上で6つのリークを特定、2つのプログラムで誤検知を排除
+
+探索空間をキャッシュ状態にも広げたタイプの記号実行、LLVM上だとキャッシュ情報とかを設定しやすいのだろうか
 
 - Title: Building and Maintaining a Third-Party Library Supply Chain for Productive and Secure SGX Enclave Development (practice)
+>  
+背景： **セキュリティ上で機密データに対する計算を Trusted Execution Environment (TEE) 内で行うことが対策の一つとなっている** → が、TEEはハードウェア支援なので、ソフトウェア全体に制約が発生し、開発が困難に（3rd Partyの依存関係にも影響）  
+実践： TEE開発者向けのTPサプライチェーンの構築と維持に対する経験と成果、 Rust TPライブラリの（大規模な）コレクションを Intel SGX へ移植。 159のOSS Rust ライブラリのSGXポートを維持
+
+ハードウェア支援系は環境が限られているなぁ。 グループGのプロダクトでハードウェア支援を採用しているのってあるのだろうか
+
+## <font color="orange"> P14 Testing </font> (4 TPs, 1 SEIP)
+
+- Title:  Seenomaly: Vision-Based Linting of GUI Animation Effects Against Design-Don’t Guidelines (paper)
+>  
+背景： **GUI アニメーションのテスト** について、既存の静的コード解析、機能的なGUIテスト、GUI画像比較手法ではできない（アニメーションが表示されないだめ）  
+提案手法： アニメーションの multi-class screencast classification task として定式化（学習させる）、教材としてオートエンコーダを利用（通常、GUIアニメーションにラベルはつかないため）  
+実装：  
+実験： モデルの学習能力、GUIアニメーションのリンティングの有効性と実用性の調査
+
+アニメーションテストの自動化という挑戦的な題材、画像処理の流行の一つか？
+
+- Title: Fuzz Testing based Data Augmentation to Improve Robustness of Deep Neural Networks (paper)
+>  
+背景： **DNNにはデータの些細な差に弱い（過学習と似ている）** 。 テスト生成技術の最近 → 目的のプログラム動作の仕様強化に採用  
+提案手法： DNNのトレーニング用にソフトウェアのテストデータをFuzzingによって最適なものへと改善する SENSEI  
+実装：  
+実験： 5つの一般的な画像データセットにまたがる15のDNNモデルで評価 → Robustnessが平均5.5%向上
+
+テストデータは少なく、過学習が起きやすい → Fuzzでデータ増やしてやればええやん！ ということ（多分ズレてる）？
+
+- Title: Modeling and Ranking Flaky Tests at Apple (practice)
+>  
+背景： Flaky Test が発生するとツライ（が、完全排除が難しいプロダクトもある） → 成功と失敗が安定しないのでテストパイプラインが狂う  
+提案手法： **テストのflakinessをモデル化、定量化する2つの手法** → テスト結果のランダム性を検出  
+実装：  
+実験： Appleの2つのテストスイートにどのように影響したかを調査、テストのスコア範囲などからFlakinessがテスト全体にどのように分布しているか調査 → 2つのFlakinessの原因特定に利用できた、最終的にFlakinessを44%削減
+
+Flaky再び。やはりランダム性などの非決定的となるテストを言っているっぽい。意外と面白そうな分野ではある
+
+- Title: Testing File System Implementations on Layered Models (paper)
+>  
+背景：**高品質のシステムコールシーケンスを生成するのはファイルシステムの実装テストにも重要だが、一方で入力空間がめっちゃ大きいのでチャレンジング**。  
+提案手法： Layered Model Checking → ファイルシステムのワークロード（シスコのシーケンス）Genとしてインスタンス化  
+実装：  
+実験： Linuxカーネルのファイルシステムで1000以上のクラッシュを引き起こすのに成功（うち12個は未知）
+
+システムコールシーケンスのワークロードってどう作るんだろ、各システムコールをモデリングしているのか、直接カーネル内部を叩くのか…
+
+- Title: A Cost-efficient Approach to Building in Continuous Integration (paper)
+>  
+背景： **Continuous Integration (CI: 継続的インテグレーション) は広く使われているが、費用がかさむんじゃ** → GoogleとMozillaでは数百万ドル規模らしいっすよ  
+提案手法： CIコストの削減アプローチ → 開発者がバグを早期に発見できるのが肝要 → 一連のビルドエラーについてビルドエラーを分割・予測する SmartBuildSkip（ビルド失敗を早期に発見）  
+実装：  
+実験： ビルドの節約（中央値30%）を達成
+
+ビルドエラーは確かにつらいねんな。具体的な規模も出てきている（Googleとかの何%になるのかは知らんが）
+
+## P16 Security and Learning
+
+## <font color="orange"> P17 Software Development </font> (2 TPs, 2 Journals, 1 Demo)
+
+- Title: Improving the Pull Requests Review Process Using Learning-to-rank Algorithms (journal)
+>  
+背景： Githubのような開発プラットフォームにおいて、プルリクエストを介して貢献できることが多い → **が、そのプルリクエストをレビューする人へのサポートが足りとらん（要レビューが増えすぎている）**  
+提案手法： プルリクエストをランキングし、レビュアーへリコメンドする Learning-to-Rank (LtR) → 即マージ/即拒否できる可能性でランキング  
+実装： 18のメトリクスを用いて LtRモデルを構築  
+実験： 74のJavaプロジェクトで実証
+
+プルリクエストについて学習を行う模様、（即適用/不適用をどう判定しているのかは気になるが、機械学習だとそこらへんがボケる気がする）
+
+- Title: Understanding the motivations, challenges and needs of Blockchain software developers: a survey (journal)
+>  
+背景： ブロックチェーンソフトウェア（BCS）のプロジェクトはGitHubに8000以上あるけど、そのプロジェクトとContributorを調査した論文（研究）はない → **いまだにBCS周辺のニーズや課題が明らかになっていない**  
+調査： 1604人のContributorへオンライン調査（回答156件） → BCS開発者の大半は非BCS開発の経験あり（主に金融関連）、BCSと非BCS開発はやや異なると感じている（アップグレードの困難さ、欠陥コストの高さなど）、また非BCSの開発支援ではBCS開発の要求を満たしきれていない
+
+すげえ規模の調査だと思った（小並感）。ブロックチェーン自体の研究はあってもその開発についての研究は少ないのか
+
+- Title: Gap between Theory and Practice : An Empirical Study of Security Patches in Solidity (paper)
+>  
+背景： Ethereum BCプラットフォームの一つ。 学界がスマートコントラクタのセキュリティについて色々研究しているが、果たして実用的か？  
+調査： **Solidity が言語の場合のセキュリティの安全性を調査** → 既知の脆弱性の多くについて未だパッチが充てられていない、かつ開発者も最新のコンパイラを使っていない（98%）ので脆弱である → Solidity開発者の誤りを特定
+
+Solidityという言語があるのは初めて知った。未だにブロックチェーン回りでは理論と実践の間に乖離がある模様
+
+- Title: A Tale from the Trenches: Cognitive Biases and Software Development (paper)
+>  
+背景： 認知バイアスはその後の行動に悪影響を与える可能性がある → **開発タスクでも認知バイアスは発生する** が、このときの影響についての調査は多くない  
+調査： 開発おける認知バイアスの発生頻度、影響、対処の実践とツールについて調査
+
+えらく文体が本じみている。認知バイアス：人間が自身の記憶などを都合よく解釈すること
+
+## P18 OSS
+
+## <font color="orange"> I13 Testing and Debugging 1 </font> (2 TPs, 2 Journals, 1 SEIP, 1 Demo)
+
+- Title: Learning-to-Rank vs Ranking-to-Learn: Strategies for Regression Testing in Continuous Integration (paper)
+>  
+背景： CIにおいてリグレッションテストは時間という制約がある → **テストスイートの中で優先順位をつける必要がある** → 機械学習ベースの手法（LtRとRtL）  
+調査： 10個のアルゴリズムを紹介、 Apache Commons プロジェクトを用いて比較
+
+RtLアゲイン。リグレッションテストをランキングするというのはまあわかる（具体的な手法はさっぱりだが）
+
+- Title: Debugging Inputs
+>  
+背景： プログラムが入力の処理に失敗したとき、必要になるのは障害を起こしたコードとは限らない → **入力と障害の関連性も含めてデバッグする必要がある**  
+提案手法： ddmax 入力データのどこが障害を引き起こすのか、また入力が通るように修復する汎用アルゴリズム（プログラム解析を必要としない）  
+実装：  
+実験： 入力ファイルの69%を修復、入力ごとに1分以内にデータの78%を回復
+
+解析不要と言っているが、入力と処理を対応づけているなら解析不要は無理では？ それともパスする入力から合成するのだろうか
+
+- Title: Property-based Testing for LG Home Appliances using Accelerated Software-in-the-Loop Simulation (practice)
+>  
+背景： LG家電は多くの便利な機能が組み込まれているが制御ソフトウェアも複雑に → **検証するにしてもハードウェア依存が大きいので統合テストがツライ**  
+提案手法： Software-in-the-Loop (SILS) を用いたプロパティベースのテストフレームワーク → ハードウェア完成前にソフトウェアのチェックが可能に  
+実装：  
+実験： 開発中の二つの製品に障害事例を発見（手動テストでは発見できんかった）、　リコールしていたら費用は数千万ドルにいくで
+
+LG：韓国のメーカーのことでいいのか（著者がそもそもLGの人やった） ハードウェアを開発するとしたモデムぐらいだが…
+
+- Title: Predicting Software Defect Type using Concept-based Classification (journal)
+>  
+背景：欠陥の説明（自然言語）からソフトウェアの欠陥タイプを自動的に予測 → 欠陥管理プロセスが大幅にスピードアップ → 主なアプローチは教師あり学習だが、分類子を学習するためのラベル付きデータの用意にはめっちゃ苦労すんねん  
+提案手法： レポートを Concept-based Classification (CBC: 概念ベースの分類) を用いて分類 → Wikipediaの記事を横断する概念空間の説明を投影 → 意味的類似性を計算（類似度から分類）  
+実装：  
+実験：トレーニング不要で精度を達成できた（F1値が63.16）
+
+障害タイプの粒度が気になるところ。ある意味混合テキストとは相反する論文？
+
+- Title: The Art, Science, and Engineering of Fuzzing: A Survey (journal)
+>  
+背景： Fuzzingは人気あるよね → コミュニティなんかも活発だが、各ツールの重要な設定などは共有されていないし、用語も断片化している（統一されていない） → 今後の研究の妨害になりかねない  
+調査： 過去10年の主要な論文とGitHubで100スター以上のプロジェクトを調査、体系的な調査を実施
+
+確かにFuzz（記号実行の分野でも）の用語にはブレがある。個人的に興味深いサーベイ
+
+## ~I15 Ecosystems 1~
+
+## <font color="orange"> I16 Testing and Debugging 2 </font> (2 TPs, 4 Journals)
+
+- Title: Low-Overhead Deadlock Prediction (paper)
+>  
+背景： リリース後のプログラムでもデッドロックは起きる → デッドロック検知器は動的オバヘが大きいので開発段階でしか適用できない → エンドユーザ側でも使えるのが欲しい  
+提案手法： AirLock 低オバヘのデッドロック予測器 → Reachability Graph を維持して少サイクルでデッドロックを検出  
+実装：  
+実験： 平均オバヘは3.5%（やるじゃない）、既存研究より3桁少ない → AFLと併用も可能だし、オンザフライでの使用にも適している
+
+グラフ探索問題に帰結しているということなんだろうけど、対象言語が気になるところ
+
+- Title: The Impact of Feature Reduction Techniques on Defect Prediction Models (journal)
+>  
+背景： 欠陥予測はソフトウェアの品質維持のための大事なタスク。 既存研究の多くは学習の特徴数を少なくしている（特徴が多いと爆発する可能性が高くなる） → が、特徴の選択（選別）は欠陥予測へ影響があることが分かっている → 大規模調査は未実施   
+調査： 5つの教師あり学習モデルと5つの教師なし欠陥予測モデルのパフォーマンスと特徴削減の影響を調査、比較
+
+九大、京大の先生のサーベイ。欠陥予測はある意味運用・保守の1タスクだが…
+
+curse of dimensionality (次元の呪い: 次元が増えると探索空間も指数的に増えること)
+
+- Title: The Impact of Correlated Metrics on the Interpretation of Defect Models (journal)
+>  
+背景： 欠陥モデルはソフトウェアの品質に関する経験的理論を構築するための分析モデル → モデルから知識の抽出ができることも → 最近は相関メトリクスが解釈へ影響を与える可能性についての懸念（が、未調査）  
+調査： 14の公的に利用可能な欠陥データセットのケーススタディを調査 → 相関メトリクスの一貫性などへ影響がある
+
+共同研究で参考になるかも？ 知識の抽出という点で。 論文はIEEEとかからじゃないと閲覧できない模様
+
+- Title:
 >  
 背景：  
 提案手法：  
 実装：  
 実験：
+
+- Title:
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title:
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+## I17 Contracts and Analysis
+
+## I18 APIs and Commits
+
+## <font color="orange"> I19 Code Generation and Verification </font> (2 TPs, 2 SEIPs, 2 NIERs)
+
+## I20 Android Testing
+
+## I21 Version Control and Programming
+
+## <font color="orange"> I22 Testing </font> (4 TPs, 2 Demos)
+
+## I23 Code Artifact Analysis
+
+## <font color="orange"> A21 Testing and Debugging 3 </font> (2 TPs, 4 Journals)
+
+## ~A22 Cognition~
+
+## A23 Requirements
+
+## <font color="orange"> A24 Testing and Debugging 4 </font> (2 TPs, 2 Journals, 1 Demo, 2 NIERs)
+
+## <font color="orange"> P25 Fuzzing </font> (5 TPs)
+
+## P26 Deep Learning Testing and Debugging
+
+## P27 Applications
+
+## <font color="orange"> P28 Analysis and Verification </font> (3 TPs, 1 SEIP, 2 Demos)
+
+## P29 Android and Web Testing
+
+## ~P30 Ecosystems 2~
+
+## A25 Android Testing
+
+## <font color="orange"> A26 Bugs and Repair </font> (2 TPs, 4 Journals)
+
+## A27 Software Architecture
+
+## A28 Android and Web Testing
+
+## <font color="orange"> A29 Code Analysis and Verification </font> (4 TPs, 1 NIER)
+
+## A30 Dependencies and Configuration
+
 
 - Title:
 >  
