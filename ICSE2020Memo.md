@@ -417,7 +417,7 @@ Tag_S_Test, Tag_S_Debug
 強調表示のし損ね（FN）とか冗長（FP）とかがどれだけあるのか気になるところ。対象はTizenのみ？
 ___
 
-- Title: Explaining Regressions via Alignment Slicing and Mending (journal)
+- Title: <font color="orange"> Explaining Regressions via Alignment Slicing and Mending </font> (journal)
 >  
 背景： Regression Faults が発生した場合の一般的な作業 1) 障害発生個所の分離 2) 障害発生へのフローの理解 → 障害箇所の特定の既存研究 Dynamic Slicing, Delta Debugging, Symbolic Analysis → 精度やスケーラビリティの問題が依然残る  
 提案手法： トレースベース （Defectがどのように障害へ伝播するのか調査） → **Causality Graph** の構築。 課題１ ２つのプログラムバージョンの各トレースのアライメント（どのように重要な差分を表現するか）。 課題２ **Alignment Slice**, Mending から Causality Graph を構築、障害の説明。  
@@ -477,6 +477,11 @@ ___
 
 ## <font color="orange"> A9 Traceability </font> (3 TRs, 1 SEIP, 1 Demo, 1 NIER)
 
+<div class="waku">
+<details open>
+
+___
+
 - Title: A Novel Approach to Tracing Safety Requirements and State-Based Design Models (paper)
 >  
 背景： Traceability はソフトウェアとシステムの安全使用の保証において重要 → が、**自動化Traceabilityでは多くのFPが発生し低精度**  
@@ -484,7 +489,11 @@ ___
 実装：  
 実験： 27の要件を持つ2つの自動車システムの評価 → 最先端技術と比較してかなりの精度向上
 
+Tag_Model_Checking, Tag_Traceability  
+Tag_S_Traceability
+
 ここでのmutantはどういう意味だろう
+___
 
 - Title: Establishing Multilevel Test-to-Code Traceability Links (paper)
 >  
@@ -493,14 +502,22 @@ ___
 実装：  
 実験： 4つの大規模OSSシステムで評価 → 78%のMAP（Mean Average Precision： 平均精度）でTraceability Linksを確立可能、 テストクラス→クラス間は93%やぞ
 
+Tag_Traceability, Tag_Test, Tag_Code  
+Tag_S_Traceability
+
 なんか大抵はクラスのテストクラスってHogeTestとかになるんじゃ？ → まさかクラス名からリンク張るとかではないな？ メソッド単位のテストリンクをどう張るのかは気になる、あと依存関係にあるクラス間とかどうするのか
+___
 
 - Title: Lack of Adoption of Units of Measurement Libraries: Survey and Anecdotes (practice)
 >  
 背景： **Units of Measurement (UoM)** のライブラリはUnit内の変数を適当にエンコードして変換する → 3700ものライブラリがある、車輪の再発明が起きている、冗長である  
 調査： UoMライブラリについて 3人の開発者と1人の科学者からヒアリング、オンラインアンケートを実施（91人の回答） → UoMライブラリへの不満と既存ライブラリが採用されない理由が判明 → UoMライブラリ製作者へリコメンド
 
+Tag_UoM, Tag_Survey, Tag_Recommend  
+Tag_S_Traceability
+
 車輪の再発明 (wheel is being reinvented, reinventing the wheel) -> 確立済みの技術を一から再度作ること、つまり冗長な準備の意 （たまに権藤先生が口にしていた）。 既存ライブラリに乗っかるのは常套手段だが、実際には痒い所に手が届かないこと、ありますあります。
+___
 
 - Title: Improving the Effectiveness of Traceability Link Recovery using Hierarchical Bayesian Networks (paper)
 >  
@@ -509,32 +526,56 @@ ___
 実装：  
 実験：既存手法と比較してデータセット全体で一貫した効果を提示。 主要な通信会社と協力しCometプラグインを開発 → 現場に適用し、実用的との評価
 
+Tag_Traceability, Tag_Efficiency, Tag_Learning, Tag_Automation  
+Tag_S_Traceability
+
 アーティファクトが具体的に何を指すのか（ほかのTraceability論文でもそうだが）
+___
+
+</details>
+</div>
 
 ## ~A10 Human Aspects 2~
 
 ## <font color="orange"> A11 Performance and Analysis </font> (1 TR, 4 Journals, 1 Demo, 1 NIER)
 
+<div class="waku">
+<details open>
+
+___
+
 - Title: Testing with Fewer Resources: An Adaptive Approach to Performance-Aware Test Case Generation (journal)
 >  
 背景： テストケースの自動生成はカバレッジを基準に据えることが多かったが、最近の傾向ではランタイムとメモリも尺度として使われるようになってきた。 **カバレッジに影響を与えずコスト下げられるといいよね**  
 提案手法： aDynaMOSA (adaptive DynaMOSA) テストの実行コストを合理的に見積もるアルゴリズム  
-実装：  
+実装： EvoSuite (JUnitの自動テスト)  
 実験： 110のJavaクラスについて、DynaMOSAと比較してランタイム -25%, ヒープメモリ -15% 程度でテストスイートを生成、7つのカバレッジ基準と同様の障害検出効果を保つ → Not Adaptive では不十分
 
+Tag_Test, Tag_Resource, Tag_Test_Case_Gen, Tag_Memory, Tag_Overhead  
+Tag_S_Performance, Tag_S_Analysis
+
 テストコストを見積もって効率的なテストケース生成をしつつカバレッジ基準は損なわない手法。 テストケース生成に何を使っているのか気になるところ（記号実行とかだとヒープメモリ食いつぶすとかザラなので…）
+___
 
 - Title: What's Wrong with My Benchmark Results? Studying Bad Practices in JMH Benchmarks (journal)
 >  
 背景： パフォーマンステストにおいて、マイクロベンチマークは広く使われる手法。 Java Microbenchmark Harness (JMH) などはきめ細かいテストスイートを作成可能 → が、JVMが複雑なので正確なJMHを記述するのには苦労する  
 調査： **JMHベンチの悪い慣例を経験的に調査** → 5つのプラクティスを自動検出するツールを開発 → 123 の Java-based OSS でそのプラクティスが蔓延（BAD!） → 正確な JMHの記述に苦労していることに起因 → 改善案の提示
 
+Tag_Test, Tag_JMH, Tag_Survey, Tag_Automation
+Tag_S_Performance, Tag_S_Analysis
+
 ベンチマークの不正（都合よく改変）はまま起こりそうな問題ではある。 悪い方向を調査したのは興味深い
+___
 
 - Title: Towards the Use of the Readily Available Tests from the Release Pipeline as Performance Tests. Are We There Yet? (paper)
 >  
 背景： パフォーマンステストはシステムの環境が整った後にテストされるなど、開発段階でのテストが困難 → 開発中に使用している **Readily Available Tests** (即利用可能テスト) をパフォーマンステストとして機能させられないか？  
 調査： Hadoop、Cassandra から127個のパフォーマンス問題を収集、即利用可能なテストからパフォーマンスを評価 → 多くの問題で解決が可能、しかし役立つ即利用可能テストはごく一部
+
+Tag_Test, Tag_Readily_Available_Tests, Tag_Survey  
+Tag_S_Performance, Tag_S_Analysis
+___
 
 - Title: ModGuard: Identifying Integrity & Confidentiality Violations in Java Modules (journal)
 >  
@@ -543,15 +584,31 @@ ___
 実装：  
 実験： MIC9Benchの適用例からModGuardの有効性と欠点の提示、 Tomcatのケーススタディ → Jigsawには防げない機密インスタンスのエスケープについてModGuardは防止
 
+Tag_Jigsaw, Tag_Escape_Analysis, Tag_Static_Analysis, Tag_Automation  
+Tag_S_Performance, Tag_S_Analysis
+
 エスケープ解析の一種っぽい。どちらかというとセキュリティ寄りの論文な気がするが… 比較対象がJigsaw（Java 9）なので言語的な視点も必要そう
+___
 
 - Title: The ORIS Tool: Quantitative Evaluation of Non-Markovian Systems (journal)
 >  
 背景： **ORIS** 分散にも対応する numerical solution tools (数値解法) のJava実装の提供（？） → 特にパフォーマンス効率、信頼性、保守性などの早期評価をサポート  
 
+Tag_ORIS  
+Tag_S_Performance, Tag_S_Analysis
+
 ？ 申し訳ないがいまいちORISが何なのか分らんかった（提案されたものなのか、すでにあるツールの有用性を調査したものなのか）
+___
+
+</details>
+</div>
 
 ## <font color="orange"> A12 Testing </font> (2 TRs, 2 Journals, 1 Demo, 1 NIER)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: Practical Fault Detection in Puppet Programs (paper)
 >  
@@ -560,7 +617,11 @@ ___
 実装：  
 実験： Puppetの30のモジュールで未知の問題を発見、数秒で分析可能（早い）
 
+Tag_Resource, Tag_Puppet, Tag_Modeling  
+Tag_S_Test
+
 リソースのモデル化は非常に厄介な課題の一つ。産業的にこのモデル化をどこまで適用できるのかは分らぬ
+___
 
 - Title: Empirical Assessment of Multimorphic Testing (journal)
 >  
@@ -569,7 +630,11 @@ ___
 実装：  
 実験： フレームワークを利用して、新しいテストケースがテストスイートに追加する価値があるかを評価。 3つの実証研究を通じて評価（object tracking in videos, object recognition in images, code generation）
 
+Tag_Test, Tag_Test_Suite  
+Tag_S_Test
+
 パフォーマンステストの評価ってカバレッジが重視される印象ないなぁ（カバレッジを高くしつつメモリ使用量を計測する、とかならわかるけども）
+___
 
 # 6/25 (24 absts, total 64 absts)
 
@@ -579,7 +644,11 @@ ___
 提案手法： binnacle 900,000のGithubレポジトリを取り込めるルールセット → Dockerのビルドエラーを回避、イメージサイズとビルドレイテンシを改善  
 調査： Github上のDocerfileはゴールドセット（何やらランクの高い）に比べて6倍近くルール違反
 
+Tag_Dev, Tag_Docker, Tag_Survey  
+Tag_S_Test
+
 Dockerについてもあんまりわかっていない（仮想環境っぽいことだと思っている）。産業的には仮想環境はどこまで関心があるのかは要調査
+___
 
 - Title: Improving Change Prediction Models with Code Smell-Related Information (journal)
 >  
@@ -588,7 +657,14 @@ Dockerについてもあんまりわかっていない（仮想環境っぽい�
 実装：  
 実験： 既存手法のアンチパターンメトリクスと比較 → 強度モデルのほうがベースラインよりも統計的に優れる、強度モデルがアンチパターンよりも優れた予測を示す。 F値も高い
 
+Tag_Code_Smell, Tag_Version, Tag_Metrix  
+Tag_S_Test
+
 コードの匂いに関するサーベイっぽい感じ？ 確かバージョン管理関連の話だった気がする
+___
+
+</details>
+</div>
 
 ## <font color="orange"> P13 Security </font> (3 TRs, 2 SEIPs)
 
@@ -790,7 +866,7 @@ curse of dimensionality (次元の呪い: 次元が増えると探索空間も�
 
 共同研究で参考になるかも？ 知識の抽出という点で。 論文はIEEEとかからじゃないと閲覧できない模様
 
-# 6/26 (* absts, total * absts)
+# 6/26 (11 absts, total 75 absts)
 
 - Title: The Impact of Mislabeled Changes by SZZ on Just-in-Time Defect Prediction (journal)
 >  
@@ -897,6 +973,8 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 サーベイそ側面もありそうな脆弱性解析論文。静的解析と動的Fuzzについては興味あり（動的Fuzzって何だ、静的Fuzzがあるのか？ …まあ記号実行もFuzzの一部っちゃ一部だから静的Fuzzもあるか）
 
 ## I23 Code Artifact Analysis
+
+# 6/29 (* absts, total * absts)
 
 ## <font color="orange"> A21 Testing and Debugging 3 </font> (2 TPs, 4 Journals)
 
