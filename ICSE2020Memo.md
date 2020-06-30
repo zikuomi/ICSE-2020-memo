@@ -668,6 +668,11 @@ ___
 
 ## <font color="orange"> P13 Security </font> (3 TRs, 2 SEIPs)
 
+<div class="waku">
+<details open>
+
+___
+
 - Title: Burn After Reading: A Shadow Stack with Microsecond-level Runtime Rerandomization for Protecting Return Addresses (paper)
 >  
 背景： **ROP (Return-oriented Programming)** ret命令を用いたコールスタック制御（return addressの改竄）によるコード再利用攻撃 → 主な対策案 Shadow Stack, CFI, code randomization → 既存のrandomizationは高度なポインタ追跡が必要  
@@ -675,7 +680,11 @@ ___
 実装：  
 実験： SPEC CPU2006 の19個のベンチマークで検証、バイナリサイズは微増（ave: +29.44%）、return address保持のために8MBのみ占有、突破率を 1/2^20 程度に下げる、動的オーバーヘッドはshadow Stackと同程度
 
-Shadow Stackだけでは無理なん？と思ってしまった。 Shadow Stackの問題点は本文で指摘されている？ 学生時代だと面白そうな内容（バイナリだし）、が、グループG的にはジャンル違い
+Tag_Call_Stack, Tag_Random, Tag_Binary, Tag_Overhead  
+Tag_S_Security
+
+Shadow Stackだけでは無理なん？と思ってしまった。 Shadow Stackの問題点は本文で指摘されている？ 学生時代だと面白そうな内容（バイナリだし）、が、グループ的にはジャンル違い
+___
 
 - Title: Automated Identification of Libraries from Vulnerability Data (practice)
 >  
@@ -684,7 +693,11 @@ Shadow Stackだけでは無理なん？と思ってしまった。 Shadow Stack�
 実装：  
 実験： NVD (National Vulnerability Database) について検証 → F1@k は 0.53
 
+Tag_Review, Tag_Learning, Tag_Library  
+Tag_S_Security
+
 F値が0.53だとまだ実用化までには課題も多そう。 XMLは初めて知った
+___
 
 - Title: Unsuccessful Story about Few Shot Malware-Family Classification and Siamese Network to the Rescue (paper)
 >  
@@ -693,7 +706,11 @@ F値が0.53だとまだ実用化までには課題も多そう。 XMLは初め�
 実装：  
 実験： 少数ファミリでは高いパフォーマンスを発揮（可能性あり） → 全体のパフォーマンス向上につながる
 
+Tag_Malware, Tag_Learning  
+Tag_S_Security
+
 問題こそマルウェアだが、論文の内容は少サンプルの分類問題をいかに効率的に学習させるか、ということになってない？ マルウェア固有の要素はあるのだろうか（あるいはただの応用先？）
+___
 
 - Title: SpecuSym: Speculative Symbolic Execution for Cache Timing Leak Detection (paper)
 >  
@@ -702,16 +719,32 @@ F値が0.53だとまだ実用化までには課題も多そう。 XMLは初め�
 実装： KLEE上に実装  
 実験： 14のOSSベンチマークに対して評価 → 4つの異なるキャッシュ上で6つのリークを特定、2つのプログラムで誤検知を排除
 
+Tag_Cache, Tag_Modeling, Tag_KLEE, Tag_Timing_Leak  
+Tag_S_Security
+
 探索空間をキャッシュ状態にも広げたタイプの記号実行、LLVM上だとキャッシュ情報とかを設定しやすいのだろうか
+___
 
 - Title: Building and Maintaining a Third-Party Library Supply Chain for Productive and Secure SGX Enclave Development (practice)
 >  
 背景： **セキュリティ上で機密データに対する計算を Trusted Execution Environment (TEE) 内で行うことが対策の一つとなっている** → が、TEEはハードウェア支援なので、ソフトウェア全体に制約が発生し、開発が困難に（3rd Partyの依存関係にも影響）  
 実践： TEE開発者向けのTPサプライチェーンの構築と維持に対する経験と成果、 Rust TPライブラリの（大規模な）コレクションを Intel SGX へ移植。 159のOSS Rust ライブラリのSGXポートを維持
 
+Tag_TEE, Tag_Hardware, Tag_Dependency  
+Tag_S_Security
+
 ハードウェア支援系は環境が限られているなぁ。 グループGのプロダクトでハードウェア支援を採用しているのってあるのだろうか
+___
+
+</details>
+</div>
 
 ## <font color="orange"> P14 Testing </font> (4 TPs, 1 SEIP)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title:  Seenomaly: Vision-Based Linting of GUI Animation Effects Against Design-Don’t Guidelines (paper)
 >  
@@ -720,7 +753,11 @@ F値が0.53だとまだ実用化までには課題も多そう。 XMLは初め�
 実装：  
 実験： モデルの学習能力、GUIアニメーションのリンティングの有効性と実用性の調査
 
+Tag_GUI, Tag_Animation, Tag_Test, Tag_Learning  
+Tag_S_Test
+
 アニメーションテストの自動化という挑戦的な題材、画像処理の流行の一つか？
+___
 
 - Title: Fuzz Testing based Data Augmentation to Improve Robustness of Deep Neural Networks (paper)
 >  
@@ -729,16 +766,24 @@ F値が0.53だとまだ実用化までには課題も多そう。 XMLは初め�
 実装：  
 実験： 5つの一般的な画像データセットにまたがる15のDNNモデルで評価 → Robustnessが平均5.5%向上
 
-テストデータは少なく、過学習が起きやすい → Fuzzでデータ増やしてやればええやん！ ということ（多分ズレてる）？
+Tag_Learning, Tag_Fuzz, Tag_Test_Case_Gen  
+Tag_S_Test
 
-- Title: Modeling and Ranking Flaky Tests at Apple (practice)
+テストデータは少なく、過学習が起きやすい → Fuzzでデータ増やしてやればええやん！ ということ（多分ズレてる）？
+___
+
+- Title: <font color="orange"> Modeling and Ranking Flaky Tests at Apple </font> (practice)
 >  
 背景： Flaky Test が発生するとツライ（が、完全排除が難しいプロダクトもある） → 成功と失敗が安定しないのでテストパイプラインが狂う  
 提案手法： **テストのflakinessをモデル化、定量化する2つの手法** → テスト結果のランダム性を検出  
 実装：  
 実験： Appleの2つのテストスイートにどのように影響したかを調査、テストのスコア範囲などからFlakinessがテスト全体にどのように分布しているか調査 → 2つのFlakinessの原因特定に利用できた、最終的にFlakinessを44%削減
 
+Tag_Flaky, Tag_Test, Tag_Modeling, Tag_Random  
+Tag_S_Test
+
 Flaky再び。やはりランダム性などの非決定的となるテストを言っているっぽい。意外と面白そうな分野ではある
+___
 
 - Title: Testing File System Implementations on Layered Models (paper)
 >  
@@ -747,7 +792,11 @@ Flaky再び。やはりランダム性などの非決定的となるテストを
 実装：  
 実験： Linuxカーネルのファイルシステムで1000以上のクラッシュを引き起こすのに成功（うち12個は未知）
 
+Tag_System_Call, Tag_Test, Tag_Model_Checking  
+Tag_S_Test
+
 システムコールシーケンスのワークロードってどう作るんだろ、各システムコールをモデリングしているのか、直接カーネル内部を叩くのか…
+___
 
 - Title: A Cost-efficient Approach to Building in Continuous Integration (paper)
 >  
@@ -756,11 +805,23 @@ Flaky再び。やはりランダム性などの非決定的となるテストを
 実装：  
 実験： ビルドの節約（中央値30%）を達成
 
+Tag_CI, Tag_Dev, Tag_Prediction  
+Tag_S_Test
+
 ビルドエラーは確かにつらいねんな。具体的な規模も出てきている（Googleとかの何%になるのかは知らんが）
+___
+
+</details>
+</div>
 
 ## P16 Security and Learning
 
 ## <font color="orange"> P17 Software Development </font> (2 TPs, 2 Journals, 1 Demo)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: Improving the Pull Requests Review Process Using Learning-to-rank Algorithms (journal)
 >  
@@ -769,39 +830,67 @@ Flaky再び。やはりランダム性などの非決定的となるテストを
 実装： 18のメトリクスを用いて LtRモデルを構築  
 実験： 74のJavaプロジェクトで実証
 
+Tag_Github, Tag_Review, Tag_Recommend, Tag_LtR, Tag_Learning  
+Tag_S_Dev
+
 プルリクエストについて学習を行う模様、（即適用/不適用をどう判定しているのかは気になるが、機械学習だとそこらへんがボケる気がする）
+___
 
 - Title: Understanding the motivations, challenges and needs of Blockchain software developers: a survey (journal)
 >  
 背景： ブロックチェーンソフトウェア（BCS）のプロジェクトはGitHubに8000以上あるけど、そのプロジェクトとContributorを調査した論文（研究）はない → **いまだにBCS周辺のニーズや課題が明らかになっていない**  
 調査： 1604人のContributorへオンライン調査（回答156件） → BCS開発者の大半は非BCS開発の経験あり（主に金融関連）、BCSと非BCS開発はやや異なると感じている（アップグレードの困難さ、欠陥コストの高さなど）、また非BCSの開発支援ではBCS開発の要求を満たしきれていない
 
+Tag_Block_Chain, Tag_Github, Tag_Survey, Tag_Dev  
+Tag_S_Dev
+
 すげえ規模の調査だと思った（小並感）。ブロックチェーン自体の研究はあってもその開発についての研究は少ないのか
+___
 
 - Title: Gap between Theory and Practice : An Empirical Study of Security Patches in Solidity (paper)
 >  
 背景： Ethereum BCプラットフォームの一つ。 学界がスマートコントラクタのセキュリティについて色々研究しているが、果たして実用的か？  
 調査： **Solidity が言語の場合のセキュリティの安全性を調査** → 既知の脆弱性の多くについて未だパッチが充てられていない、かつ開発者も最新のコンパイラを使っていない（98%）ので脆弱である → Solidity開発者の誤りを特定
 
+Tag_Ethereum, Tag_Smart_Contract, Tag_Solidity, Tag_Patch  
+Tag_S_Dev
+
 Solidityという言語があるのは初めて知った。未だにブロックチェーン回りでは理論と実践の間に乖離がある模様
+___
 
 - Title: A Tale from the Trenches: Cognitive Biases and Software Development (paper)
 >  
 背景： 認知バイアスはその後の行動に悪影響を与える可能性がある → **開発タスクでも認知バイアスは発生する** が、このときの影響についての調査は多くない  
 調査： 開発おける認知バイアスの発生頻度、影響、対処の実践とツールについて調査
 
+Tag_Human, Tag_Dev, Tag_Survey  
+Tag_S_Dev
+
 えらく文体が本じみている。認知バイアス：人間が自身の記憶などを都合よく解釈すること
+___
+
+</details>
+</div>
 
 ## P18 OSS
 
 ## <font color="orange"> I13 Testing and Debugging 1 </font> (2 TPs, 2 Journals, 1 SEIP, 1 Demo)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: Learning-to-Rank vs Ranking-to-Learn: Strategies for Regression Testing in Continuous Integration (paper)
 >  
 背景： CIにおいてリグレッションテストは時間という制約がある → **テストスイートの中で優先順位をつける必要がある** → 機械学習ベースの手法（LtRとRtL）  
 調査： 10個のアルゴリズムを紹介、 Apache Commons プロジェクトを用いて比較
 
+Tag_CI, Tag_Regression, Tag_LtR, Tag_Test_Suite, Tag_Learning  
+Tag_S_Test, Tag_S_Debug
+
 RtLアゲイン。リグレッションテストをランキングするというのはまあわかる（具体的な手法はさっぱりだが）
+___
 
 - Title: Debugging Inputs
 >  
@@ -810,7 +899,11 @@ RtLアゲイン。リグレッションテストをランキングするとい�
 実装：  
 実験： 入力ファイルの69%を修復、入力ごとに1分以内にデータの78%を回復
 
+Tag_Localization, Tag_Input, Tag_Debug  
+Tag_S_Test, Tag_S_Debug
+
 解析不要と言っているが、入力と処理を対応づけているなら解析不要は無理では？ それともパスする入力から合成するのだろうか
+___
 
 - Title: Property-based Testing for LG Home Appliances using Accelerated Software-in-the-Loop Simulation (practice)
 >  
@@ -819,7 +912,11 @@ RtLアゲイン。リグレッションテストをランキングするとい�
 実装：  
 実験： 開発中の二つの製品に障害事例を発見（手動テストでは発見できんかった）、　リコールしていたら費用は数千万ドルにいくで
 
+Tag_Hardware, Tag_Integration_Test, Tag_SILS, Tag_Test  
+Tag_S_Test, Tag_S_Debug
+
 LG：韓国のメーカーのことでいいのか（著者がそもそもLGの人やった） ハードウェアを開発するとしたモデムぐらいだが…
+___
 
 - Title: Predicting Software Defect Type using Concept-based Classification (journal)
 >  
@@ -828,14 +925,25 @@ LG：韓国のメーカーのことでいいのか（著者がそもそもLGの�
 実装：  
 実験：トレーニング不要で精度を達成できた（F1値が63.16）
 
-障害タイプの粒度が気になるところ。ある意味混合テキストとは相反する論文？
+Tag_Learning, Tag_Natural, Tag_Prediction  
+Tag_S_Test, Tag_S_Debug
 
-- Title: The Art, Science, and Engineering of Fuzzing: A Survey (journal)
+障害タイプの粒度が気になるところ。ある意味混合テキストとは相反する論文？
+___
+
+- Title: <font color="orange"> The Art, Science, and Engineering of Fuzzing: A Survey </font> (journal)
 >  
 背景： Fuzzingは人気あるよね → コミュニティなんかも活発だが、**各ツールの重要な設定などは共有されていないし、用語も断片化している（統一されていない）** → 今後の研究の妨害になりかねない  
 調査： 過去10年の主要な論文とGitHubで100スター以上のプロジェクトを調査、体系的な調査を実施
 
+Tag_Fuzz, Tag_Survey, Tag_Github  
+Tag_S_Test, Tag_S_Debug
+
 確かにFuzz（記号実行の分野でも）の用語にはブレがある。個人的に興味深いサーベイ
+___
+
+</details>
+</div>
 
 ## ~I15 Ecosystems 1~
 
@@ -873,6 +981,8 @@ curse of dimensionality (次元の呪い: 次元が増えると探索空間も�
 背景： **JITの欠陥予測** は注目度高いで （SZZを利用） → 中のSZZがノイズによって影響を受ける → トレーニング用のラベルが誤ったものになる可能性  
 調査： SZZ（とそのバリアント）の誤ラベルとその影響について調査、10のApache オープンソースプロジェクトじゃら126,526の変更を用いて学習 → SZZによって誤ったラベルが付くと、検査作業に悪影響が発生
 
+Tag_JIT
+
 SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起こす変更を識別する手法。 主にSZZのサーベイ。
 
 - Title: Which Variables Should I Log? (journal)
@@ -888,6 +998,8 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 >  
 背景： Data-driven な欠陥予測は重要度が増加 → 対象プロジェクトからのデータだけでは学習が十分ではないことも多いので、他のプロジェクトからデータを持ってくることは多い (**CPDP: Cross-Project Defect Prediction**) → が、色々なCPDP技術の自動パラメータ最適化の影響については十分研究されていない  
 調査： 62のCPDP手法の影響を調査、13は他の論文でも調査されているが、49は未調査 → 20以上のソフトウェアプロジェクトで欠陥予測モデルを構築 → 自動化パラメータ最適化は77%のCPDPでパフォーマンス改善に効果的、転移学習はCPDPの肝（費用対効果大）、既存の転移学習と分類手法の組み合わせで代替を見つけられてしまう（CPDPはまだ未成熟）
+
+Tag_CPDP
 
 サーベイっぽい論文（TPだけど）。このセクション欠陥予測（＝機械学習の一応用先）がほとんどだったな…
 
@@ -974,9 +1086,79 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 
 ## I23 Code Artifact Analysis
 
-# 6/29 (* absts, total * absts)
+# 6/30 (* absts, total * absts)
 
 ## <font color="orange"> A21 Testing and Debugging 3 </font> (2 TPs, 4 Journals)
+
+- Title: Schrödinger's Security: Opening the Box on App Developers' Security Rationale (paper)
+>  
+背景： モバイルアプリのセキュリティ障害がなぜ混入するのか（**開発者は何故障害を起こすような導入を決定するのか**） → 開発環境の多様化と増加で複雑に → 必要なサポートを受けられていないのでは？  
+調査： 1. 六つのタスク（セットアップ、コードレビュー、ヘルプ検索、テスターの募集、広告の選択、SDKの選択）について44人の開発者への調査 → 開発者はセキュリティを重視するが、コードタスクのみその重視基準は「セキュリティだから外部SDKを利用」のみ → セキュリティコード内部で何が起きているか把握していない？ 2. 274人について幅広い調査 → 多くの開発者がセキュリティに影響する行動についてそのリスクを無視
+
+Tag_Human, Tag_Dev, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
+
+セキュリティリスクの混入原因を開発者の慣習などから調査。セキュリティは外部ライブラリに頼ればおｋ、という認識が広がっている、らしい
+___
+
+- Title: <font color="orange"> Smart Greybox Fuzzing </font> (journal)
+>  
+背景： CGF (Coverage-based Greybox Fuzzing) はいいアプローチ。 その入力（シードファイル、ファイル）をビットシーケンスとして表現することが多い → **複雑なファイル形式だと、 Random Bit Flip が有効になることはほぼない**  
+提案手法： Smart Greybox Fuzzing (SGF) 新しい入力ドメインを探索できるように、ファイルをビット列ではなく、仮想ファイル構造での入力形式を定義  
+実装： AFL  
+実験： AFLとの比較、ブランチカバレッジの大きな改善（最大+87%）。 42のゼロデイ検出、22のCVE登録を達成
+
+Tag_Fuzz, Tag_Random, Tag_AFL, Tag_Input  
+Tag_S_Test, Tag_S_Debug
+
+突然変異形式はいいアプローチだが、適用できないところがあった → 適用できるように入力形式をひねってみたぜ、ということ？ にしてもとんでもねぇ成果だなおい。 個人的に興味あり
+___
+
+- Title: Deep Transfer Bug Localization (journal)
+>  
+背景： 多くのプロジェクトで、処理できない数のバグレポートが来る → サポートが必要 → **バグのLocalizationが有効な一手だが、多くの環境でバグデータが不十分**  
+提案手法： TRANP-CNN セマンティックの抽出、ターゲットプロジェクトのラベル付きデータを活用、プロジェクト間のバグを効率的にLocalize  
+実装：  
+実験： ほかのDL手法と比較して精度指標が大幅に改善
+
+Tag_Localization, Tag_Debug, Tag_Review, Tag_Learning  
+Tag_S_Test, Tag_S_Debug
+
+セマンティックの抽出が肝っぽいが、詳しいことは不明。
+___
+
+- Title: A Benchmark-Based Evaluation of Search-Based Crash Reproduction (journal)
+>  
+背景： クラッシュの再現はそのテストケースを生成することでデバッグを支援 → **自動化手法がいくつかあるでよ → 検体がバラバラなので比較ができぬ**  
+提案手法： JCrashPack, ExRunner クラッシュ再現用のベンチマークと手法評価の実行ツール。 ベンチには様々なJavaプロジェクトの200のスタックトレースが包含  
+実装：  
+実験： EvoCrashの評価を実行 → EvoCrashは43%を再現成功。 再現しやすさ： ヌルぽ、引数例外、状態例外 > キャスト例外、範囲外配列、範囲外文字列
+
+Tag_Debug, Tag_Test_Case_Gen, Tag_Metrix  
+Tag_S_Test, Tag_S_Debug
+
+クラッシュ再現も保守の点ではいいテーマ。 この論文はあくまで手法の評価の手法。
+___
+
+- Title: An Investigation of Cross-Project Learning in Online Just-In-Time Software Defect Prediction (paper)
+>  
+背景： JIT Software Defect Prediction (JIT-SDP) には十分な量のトレーニングデータが必要 → Cross Project 手法では他のプロジェクトから学習してきて、 Within Project の予測に対処する → **ソフトウェア変更による変化を続けていった場合にも対応できるのか** は未調査  
+調査： 3つのCP JIT-SDP手法について調査。 3つのプロジェクトから2048のコミットを収集、学習に10個のOSSプロジェクトから198,468のコミットを利用 → CPデータは時間経過によって発生する精度低下を大幅に軽減
+
+Tag_CPDP, Tag_Prediction, Tag_Learning, Tag_Survey, Tag_JIT  
+Tag_S_Test, Tag_S_Debug
+___
+
+- Title: An Empirical Study of the Long Duration of Continuous Integration Builds (journal)
+>  
+背景： CIはソフトウェア開発において迅速なビルドが可能 → 開発者の専従的になってしまう問題がある（特にビルド期間が長くなるほどオーバーヘッドが大きくなる） → ビルドが長くなる背景はあいまい、要調査  
+調査： CIビルドの長期化に関連する特性を調査 → 一般的な要素（プロジェクトサイズ、チームサイズ、ビルド構成サイズ、テスト密度）だけではなく、ほかにも重要な要素があるでよ
+
+Tag_CI, Tag_Human, Tag_Dev, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
+
+結論が書かれていないではないか(´・ω・\`) なんだかんだCIも色々論じられているなー、という印象。 運用・保守という意味では同じ畑ではある
+___
 
 ## ~A22 Cognition~
 
@@ -984,13 +1166,170 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 
 ## <font color="orange"> A24 Testing and Debugging 4 </font> (2 TPs, 2 Journals, 1 Demo, 2 NIERs)
 
+- Title: On Learning Meaningful Assert Statements for Unit Test Cases (paper)
+>  
+背景： テストは重要だが、開発者は開発全体の50%もテストに費やしている（多い） → テストの自動化は大きな関心 → **Assert Statement について品質と有用性が疑問視**  
+提案手法： ATLAS (AuTomatic Learning of Assert Statement) Neural Machine Transition をベースとした Assert Statement の自動生成手法。 テストメソッドとテストメインメソッドからAssertを予測・テストメインメソッドの精度を評価  
+実装：  
+実験： Github上の 数千のテストメソッドで学習 → 予測の上位一つだと31%、上位5つだと50%でAssertが完全一致の予測を達成
+
+Tag_Test, Tag_Assert, Tag_Automation, Tag_Prediction, Tag_Learning  
+Tag_S_Test, Tag_S_Debug
+
+Assertの自動生成（学習ベース）。シンプルな奴なら役立ちそう（まあ、精度は決して高くないような印象だが）
+___
+
+- Title: TRADER: Trace Divergence Analysis and Embedding Regulation for Debugging Recurrent Neural Networks (paper)
+>  
+背景： RNNはテキスト入力を数値にエンコードするが、そのエンコードは 3rd Party の事前トレーニングの単語埋め込みに依存 → **ヘンテコな単語があると精度に悪影響**  
+提案手法： TRADER サンプルを正誤で区別し比較、モデル化 → 問題となる埋め込みがモデルのパフォーマンスに与える影響を自動的に診断→診断結果から埋め込みを強化/修復  
+実装：  
+実験： 実際のモデルとデータセットの精度を平均5.37%改善（RNN的には大幅な改善）
+
+Tag_Learning, Tag_Natural, Tag_Modeling  
+Tag_S_Test, Tag_S_Debug
+___
+
+- Title: Specification Patterns for Robotic Missions (journal)
+>  
+背景： ロボット開発においての大きな課題 → ロボソフトウェアのミッションとその自動推論を可能にする形式への変換 → 前者は一般に自然言語で記述されるため曖昧になる  
+提案手法： **ミッション要件の定義サポートのためにロボ動作に焦点を当てた新規パターン** → 構築のために245の自然言語のミッション定義文を分析  
+実装：  
+実験： 12個のモデルセットでパターンをテスト → エラーは存在。 10個のミッション要件を仕様に変換、ロボ計画を生成 → シミュレーター上で仕様が要件と対応していることを確認
+
+Tag_Robotics, Tag_Dev, Tag_Natural  
+Tag_S_Test, Tag_S_Debug
+
+開発工程におけるより上流の話ではある。（ただ、ロボティクスの話は知見がなさ過ぎて…）。どうしても自然言語関連だと（この論文は使ってなさそうだけど）機械学習っぽくなるのが辛み
+___
+
+- Title: ProXray: Protocol Model Learning and Guided Firmware Analysis (journal)
+>  
+背景： IoTデバイスはあちこちに存在 → デバイスはファームウェア内に通信プロトコル（USB/Bluetooth）を実装し、幅広い機能を実現 → プロトコルからファームウェアを分析するのは実装バグの検出にも不可欠 → プロトコルの複雑性のせいで分析の自動化に役立つ仕様はない → 手動でやらざるを得ない  
+提案手法： ProXray **記号実行とプロトコル学習モデルの組み合わせ** → 道のファームウェア内もモデルからプロトコルを識別し、記号実行でそこへ導くことが可能  
+実装：  
+実験： ProXrayをUSBとBluetoothプロトコルへ適用 → ファーム内のプロトコル関連のターゲットへ高速に到達、当該範囲の高いカバレッジを達成
+
+Tag_SymExe, Tag_Learning, Tag_Protocol, Tag_Automation  
+Tag_S_Test, Tag_S_Debug
+
+記号実行と機械学習の組み合わせは珍しい気がする。が、やっていること自体は誘導に機械学習を用いた、ということなので分離可能な要素同士ではある。
+___
+
 ## <font color="orange"> P25 Fuzzing </font> (5 TPs)
+
+- Title: Typestate-Guided Fuzzer for Discovering Use-after-Free Vulnerabilities (paper)
+>  
+背景： カバレッジベースのFuzzingでは見つけにくバグにはUaFがあるでよ → カバレッジではなく、ブランチ（エッジ）の順番が重要なため  
+提案手法： UAFL typestate ベースのFuzzer → 静的 typestate解析とFuzzingでStaging（絞る→実行）  
+実装：  
+実験： AFL, AFLFast, FairFuzz, MOpt, Angora, QSYM と比較してUAF発見にかかる時間を大幅に改善。 未知の10個の脆弱性の発見、5つのCVE登録
+
+Tag_Fuzz, Tag_AFL, Tag_Pointer, Tag_Anti_Covarage  
+Tag_S_Fuzz, Tag_S_Test
+
+UAFに特化したFuzzer。 typestate automaton と同系の手法（各変数の持つ状態・遷移をオートマトンで表現する手法）と思われる。 問題はCFGが多分intraなのと、オートマトンをどう構築しているのかという部分
+___
+
+- Title: sFuzz: An Efficient Adaptive Fuzzer for Solidity Smart Contracts (paper)
+>  
+背景： Smart Contrast はリリースすると簡単にパッチ当てができない → リリース前に徹底的にテストすべし  
+提案手法： sFuzz Ethereum 上での Smart Contrast 用のFuzzer。 よりブランチカバレッジを得られるように色々な戦略を採用   
+実装：  
+実験： Solidity 用の他のFuzzerと比較して効率的（2桁程度高速）、高いカバレッジを達成、採用戦略が補完的
+
+Tag_Fuzz, Tag_Smart_Contract, Tag_Ethereum, Tag_Solidity, Tag_Test  
+Tag_S_Fuzz, Tag_S_Test
+
+Solidityで動作するFuzzer。Smart Contract固有の特徴とかを利用しているのかが気になるところ。指標がカバレッジなので、メモリ関連には弱そう
+___
+
+- Title: Planning for Untangling: Predicting the Difficulty of Merge Conflicts (paper)
+>  
+背景： マージは破壊的な動作なので時には多くの人が関係することになる（結果、コストがかかる） → マージ解決のためのサポートはあまりない → 競合の予測ができればおいしい  
+調査： マージ競合の特性を調査、自動的な分類。 128のJavaプロジェクトで発生した6380の競合を分析、学習 → 困難さを予測することを確認（AUC 0.76）
+
+Tag_Version, Tag_Prediction, Tag_Learning, Tag_Metrix  
+Tag_S_Fuzz, Tag_S_Test
+
+Fuzzing？ パット見Fuzzingとは直接関係なさそうに見える。 共同開発したことないからいまいち背景を呑み込めてない
+___
+
+- Title: Gang of Eight: A Defect Taxonomy for Infrastructure as Code Scripts (paper)
+>  
+背景： Infrastructure-as-Code (IaC) Scripts の欠陥は大規模システムの障害など、重大になる可能性 → 欠陥の分類が修正と防止に寄与する  
+提案手法： 定性分析 (qualitative analysis) を通じた欠陥分類手法、8つのカテゴリ → OSSリポジトリから欠陥関連コミットを1448個収集、分析。 291のリポジトリから80425個のコミットを収集、分析しカテゴリを定量化  
+実装：  
+実験： 分類法を66人の開発者に同意できるか調査 → 冪等性（同じIaCスクリプトが複数回実行されると起きる欠陥）に最も同意
+
+Tag_Version, Tag_IaC  
+Tag_S_Fuzz, Tag_S_Test
+
+Fuzzing？ こちらもぱっと見Fuzzingとは直接関係なさげ。 IaCというのは聞きなれないが、アプリケーションにおけるインフラ層で利用されるスクリプトとかと捉えればおｋ？
+___
+
+- Title: JVM Fuzzing for JIT-Induced Side-Channel Detection (paper)
+>  
+背景： タイミングサイドチャネル防止のための研究はソースコードと紐づいていることが多い → が、実際にはJITによってサイドチャネルが発生・導入されてしまうことがある  
+提案手法： Java JITコンパイラによって発生するサイドチャネル攻撃を自動検出するパターンの紹介。 JVM上の動作を探索（Fuzzing）する手法  
+実装：  
+実験： サイドチャネル検出の研究で利用された3つのデータセットで評価 → これまで安全とされてきたコードが実際にはJITによってサイドチャネル攻撃に脆弱 → 過去の4つのツールと矛盾
+
+Tag_Timing_Leak, Tag_Fuzz, Tag_JIT  
+Tag_S_Fuzz, Tag_S_Test
+
+JVMでFuzzingするって結構すごいことなのでは？ タイミングサイドチャネル (Timing Side-Channel) 処理時間の差から暗号鍵などを推測する攻撃手法。
+___
 
 ## P26 Deep Learning Testing and Debugging
 
 ## P27 Applications
 
 ## <font color="orange"> P28 Analysis and Verification </font> (3 TPs, 1 SEIP, 2 Demos)
+
+- Title: Tailoring Programs for Static Analysis via Program Transformation (paper)
+>  
+背景： 静的解析は深く研究されてきた手法だが、どうしても近似が必要になり、誤検知が増える → 抑制のための手法があるが、これらは開発者のニーズとかみ合っていない（コメントの追加挿入など） → 洞察: 分析ユーザが持つ背景に関係なく分析に影響を与える能力 → modify code → わずかな変更で誤検出が抑制可能だが、冗長なコードが発生したりする  
+提案手法： 汎用的な自動コード変更手法（プログラム変換） → 静的解析器自体はブラックボックス扱い  
+実装：  
+実験： C, Java, PHP をサポートする5つの静的解析器を実世界のプログラム (>800KLoc) で評価 → 長期的な複雑課題を回避するのに効果的
+
+Tag_Language, Tag_Static_Analysis, Tag_Code_Transformation  
+Tag_S_Analysis, Tag_S_Verification
+
+要するに静的解析に適したコードへ変換する、ということだと理解。 静的解析なのでスケーラビリティが気になるところ
+___
+
+- Title: BCFA: Bespoke Control Flow Analysis for CFA at Scale (paper)
+>  
+背景： 多くのソースコード解析において、CFGに対して分析を行う、というのが一般的 → が、検査対象のCFGが数百万にもなると解析コストがバカにならない → CFGのトラバーサル戦略が固定だとマッチしない（効率的なトラバースができない）CFGが出てくる。  
+提案手法： Bespoke Control-Flow Analysis (BCFA) 制御フロー解析を用いて、各CFGに対して最も効率的なトラバース戦略を選択  
+実装： Boa  
+実験： 287,000 と 162.000,000 のCFGを持つ二つのデータセットについて解析を実施 → BCFAは1-28%程度の高速化が可能、オーバーヘッドも0.2%未満と低い、予測ミスは0.01%未満
+
+Tag_CFG, Tag_Static_Analysis, Tag_Efficiency  
+Tag_S_Analysis, Tag_S_Verification
+
+気になるのはCFGの探索（トラバース）戦略の選択肢ってそこまで多くなくね？ということ。 トラバース戦略を切り替えるというのはいいが、選択肢が少ないならミスマッチ率が低いのは全然意外じゃない
+___
+
+- Title: On the Recall of Static Call Graph Construction in Practice (paper)
+>  
+背景： 静的解析では動的要素のモデリングが必要になるが、これが難しいねんな → 難しいってのは議論されているが、どんな影響を与えるのかは未調査  
+調査： 実世界のJavaプログラムのセットを用いてCall Graph構築する上での問題を調査、どの言語機能がFNにつながるのか調査 → recall の中央値は0.884, 組み込みテストの方が合成テストよりも動作モデルを明確にする、追加の静的解析はあまり影響しない、動的要素をサポートしているかでrecallが大きく向上する（が、パフォーマンスは低下する）、unsoundnessの主な原因はreflected methodではなく、JVMから始まるmethod call
+
+Tag_Static_Analysis, Tag_Modeling, Tag_Survey  
+Tag_S_Analysis, Tag_S_Verification
+
+あくまでCall Graph構築を一例に調査した、ということなんだろうけど、得られた知見がCG構築の例と近すぎて、一般化できてなくない？ ほかの静的解析で得られる知見は全然異なる可能性が高いし
+___
+
+- Title: DeCaf: Diagnosing & Triaging Performance Issues in Large-Scale Cloud Services (practice)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
 
 ## P29 Android and Web Testing
 
@@ -1000,11 +1339,81 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 
 ## <font color="orange"> A26 Bugs and Repair </font> (2 TPs, 4 Journals)
 
+- Title: Simulee: Detecting CUDA Synchronization Bugs via Memory-Access Modeling (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Fine-Grained Dynamic Resource Allocation for Big-Data Applications (journal)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: The Assessor's Dilemma: Improving Bug Repair via Empirical Game Theory (journal)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: FixMiner: Mining Relevant Fix Patterns for Automated Program Repair (journal)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: IntRepair: Informed Repairing of Integer Overflows (journal)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: DLFix: Context-based Code Transformation Learning for Automated Program Repair (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
 ## A27 Software Architecture
 
 ## A28 Android and Web Testing
 
 ## <font color="orange"> A29 Code Analysis and Verification </font> (4 TPs, 1 NIER)
+
+- Title: Heaps'n Leaks: How Heap Snapshots Improve Android Taint Analysis (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Verifying Object Construction (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: When APIs are Intentionally Bypassed: An Exploratory Study of API Workarounds (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
+
+- Title: Demystify Official API Usage Directives with Crowdsourced API Misuse Scenarios, Erroneous Code Examples and Patches (paper)
+>  
+背景：  
+提案手法：  
+実装：  
+実験：
 
 ## A30 Dependencies and Configuration
 
