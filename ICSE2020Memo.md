@@ -6,6 +6,138 @@
 }
 </style>
 
+# Tags
+<details close>
+
+|tag  | num of  |
+|---- |----     |
+|Tag_Learning|34|
+|Tag_Survey|26|
+|Tag_Dev|16|
+|Tag_Automation|15
+|Tag_Test|12
+|Tag_Fuzz|11
+|Tag_Logging|8
+|Tag_Natural|8
+|Tag_Human|8
+|Tag_Modeling|8
+|Tag_Prediction|8
+|Tag_Review|7
+|Tag_SymExe|5
+|Tag_Static_Analysis|5
+|Tag_Debug|5
+|Tag_Defect4J|5
+|Tag_Efficiency|5
+|Tag_Regression|4
+|Tag_Random|4
+|Tag_AFL|4
+|Tag_Recommend|4
+|Tag_Patch|4
+|Tag_Github|4
+|Tag_Language|4
+|Tag_Version|4
+|Tag_Metrix|4
+|Tag_Ethereum|3
+|Tag_Smart_Contract|3
+|Tag_Repair|3
+|Tag_Android|3
+|Tag_API|3
+|Tag_Anti_Covarage|3
+|Tag_Graph|3
+|Tag_Localization|3
+|Tag_Distribution|3
+|Tag_Model_Checking|3
+|Tag_Traceability|3
+|Tag_Resource|3
+|Tag_Test_Case_Gen|3
+|Tag_Memory|3
+|Tag_CI|3
+|Tag_JIT|3
+|Tag_APR|3
+|Tag_Flaky|2
+|Tag_Integration_Test|2
+|Tag_Overhead|2
+|Tag_Test_Suite|2
+|Tag_Timing_Leak|2
+|Tag_Hardware|2
+|Tag_LtR|2
+|Tag_Solidity|2
+|Tag_Input|2
+|Tag_CPDP|2
+|Tag_Pointer|2
+|Tag_Typestate|2
+|Tag_AEBE|1
+|Tag_Animation|1
+|Tag_Assert|1
+|Tag_Binary|1
+|Tag_Block_Chain|1
+|Tag_Cache|1
+|Tag_Call_Stack|1
+|Tag_CFG|1
+|Tag_Class|1
+|Tag_Cloud|1
+|Tag_Code|1
+|Tag_Code_Fix|1
+|Tag_Code_Smell|1
+|Tag_Code_Summarization|1
+|Tag_Code_Transformation|1
+|Tag_Comment|1
+|Tag_Control|1
+|Tag_CUDA|1
+|Tag_Dependency|1
+|Tag_Design_Pattern|1
+|Tag_Docker|1
+|Tag_Escape_Analysis|1
+|Tag_Facebook|1
+|Tag_Floating|1
+|Tag_Game_Theory|1
+|Tag_GUI|1
+|Tag_Heap|1
+|Tag_IaC|1
+|Tag_Jigsaw|1
+|Tag_JMH|1
+|Tag_KLEE|1
+|Tag_Library|1
+|Tag_Malware|1
+|Tag_MPI|1
+|Tag_Naming|1
+|Tag_ORIS|1
+|Tag_Overflow|1
+|Tag_Pair_Programming|1
+|Tag_Puppet|1
+|Tag_Protocol|1
+|Tag_Readily_Available_Tests|1
+|Tag_Robotics|1
+|Tag_System_Call|1
+|Tag_SILS|1
+|Tag_SZZ|1
+|Tag_Solver|1
+|Tag_StackOverflow|1
+|Tag_Slice|1
+|Tag_Sync|1
+|Tag_Spark|1
+|Tag_Taint_Analysis|1
+|Tag_TEE|1
+|Tag_UoM|1
+|Tag_User|1
+|Tag_Warnning|1
+|----|----|
+|Tag_S_Analysis|13
+|Tag_S_Code_Gen|4
+|Tag_S_Debug|45
+|Tag_S_Dev|4
+|Tag_S_Fuzz|5
+|Tag_S_Human_Aspects|5
+|Tag_S_Performance|5
+|Tag_S_Repair|11
+|Tag_S_Security|9
+|Tag_S_Summary|4
+|Tag_S_Test|52
+|Tag_S_Traceability|4
+|Tag_S_Verification|12
+
+</details>
+
 # 6/23 (15 absts)
 
 ## ~I1 Metastudies~
@@ -328,7 +460,7 @@ ___
 実験： 様々な欠陥パターンの存在する 10K個のプロジェクトで実験 → 3000のテンプレートを抽出、また高速、FPは22%程度。 **アリババにPRECFIXをロールアウト**
 
 Tag_Recommend, Tag_Patch, Tag_Learning  
-Tag_S_Repair
+Tag_S_Debug, Tag_S_Repair
 ___
 
 - Title: On the Efficiency of Test Suite based Program Repair: A Systematic Assessment of 16 Automated Repair Systems for Java Programs (paper)
@@ -338,7 +470,7 @@ ___
 実験： Java用の16個のOSS修復ツールから生成されたパッチ候補を量的観点で実証 → 現在のテンプレートベース（最も効果的とされている）の修正システムでは無関係なパッチ候補を生成する傾向があるので最低効率となった
 
 Tag_Patch, Tag_Automation, Tag_Efficiency  
-Tag_S_Repair
+Tag_S_Debug, Tag_S_Repair
 
 パッチの効率についての研究。実をいうと未だにパッチの仕組みが分かっていない。
 ___
@@ -349,7 +481,7 @@ ___
 実験： 35578のサンプルでトレーニング、4711の実際のバグ修正と、Defects4JベンチマークでSEQUENCERを評価 → 950/4711で固定ライン（fixed line）(?) を予測、Defects4Jベンチで14のバグパッチを発見
 
 Tag_Learning, Tag_Code_Fix, Tag_Defect4J  
-Tag_S_Repair
+Tag_S_Debug, Tag_S_Repair
 
 unlimited vocabulary problem って何だろ
 ___
@@ -360,7 +492,7 @@ ___
 調査： 主な言語10の600個のプロジェクト、3Mのコミットからバグ解決データを抽出 → 解決時間とパッチサイズが言語間で大きな差が出た。 Rubyは時間がかかるなど。 静的型付け言語ではパッチが横断的になるが、解決までは短い
 
 Tag_Github, Tag_Survey, Tag_Language  
-Tag_S_Repair
+Tag_S_Debug, Tag_S_Repair
 
 言語ごとの調査は根が深そう（言語にもバージョンがあるし）。 静的型付け言語では修正時間が短いというのはどこかで引用できそうな予感
 ___
@@ -372,7 +504,7 @@ ___
 実験： Google Play 上の63件のクラッシュ関連のレビューを含むベンチマークを生成 → 人間と同程度のパフォーマンスを実現、70%のレビューを正常に再現
 
 Tag_Review, Tag_User, Tag_Automation, Tag_Android  
-Tag_S_Repair
+Tag_S_Debug, Tag_S_Repair
 
 ユーザレビューから再現するのが難しいのは認めるが、70%はにわかに信じがたい。ベンチマークにカラクリがありそう
 ___
@@ -497,7 +629,7 @@ ___
 
 - Title: Establishing Multilevel Test-to-Code Traceability Links (paper)
 >  
-背景： **test -> code の Traceability Links はテストコードとテスト済みコードの同期を保てる** → テスト失敗率と障害の見落とし率が低下（テスト重複を避けつつ未テスト箇所を特定できるから？） ただし、これらは手動でやると負担が大きい  
+背景： **test → code の Traceability Links はテストコードとテスト済みコードの同期を保てる** → テスト失敗率と障害の見落とし率が低下（テスト重複を避けつつ未テスト箇所を特定できるから？） ただし、これらは手動でやると負担が大きい  
 提案手法： TCtracer test->code の Traceability Links を自動で確立する手法。 メソッド粒度、クラス粒度の両方で動作 → メソッド・クラス間の相乗的な情報の流れを利用  
 実装：  
 実験： 4つの大規模OSSシステムで評価 → 78%のMAP（Mean Average Precision： 平均精度）でTraceability Linksを確立可能、 テストクラス→クラス間は93%やぞ
@@ -516,7 +648,7 @@ ___
 Tag_UoM, Tag_Survey, Tag_Recommend  
 Tag_S_Traceability
 
-車輪の再発明 (wheel is being reinvented, reinventing the wheel) -> 確立済みの技術を一から再度作ること、つまり冗長な準備の意 （たまに権藤先生が口にしていた）。 既存ライブラリに乗っかるのは常套手段だが、実際には痒い所に手が届かないこと、ありますあります。
+車輪の再発明 (wheel is being reinvented, reinventing the wheel) → 確立済みの技術を一から再度作ること、つまり冗長な準備の意 （たまに権藤先生が口にしていた）。 既存ライブラリに乗っかるのは常套手段だが、実際には痒い所に手が届かないこと、ありますあります。
 ___
 
 - Title: Improving the Effectiveness of Traceability Link Recovery using Hierarchical Bayesian Networks (paper)
@@ -949,6 +1081,11 @@ ___
 
 ## <font color="orange"> I16 Testing and Debugging 2 </font> (2 TPs, 4 Journals)
 
+<div class="waku">
+<details open>
+
+___
+
 - Title: Low-Overhead Deadlock Prediction (paper)
 >  
 背景： リリース後のプログラムでもデッドロックは起きる → **デッドロック検知器は動的オバヘが大きいので開発段階でしか適用できない** → エンドユーザ側でも使えるのが欲しい  
@@ -956,23 +1093,35 @@ ___
 実装：  
 実験： 平均オバヘは3.5%（やるじゃない）、既存研究より3桁少ない → AFLと併用も可能だし、オンザフライでの使用にも適している
 
+Tag_Graph, Tag_Efficiency, Tag_Logging  
+Tag_S_Test, Tag_S_Debug
+
 グラフ探索問題に帰結しているということなんだろうけど、対象言語が気になるところ
+___
 
 - Title: The Impact of Feature Reduction Techniques on Defect Prediction Models (journal)
 >  
 背景： 欠陥予測はソフトウェアの品質維持のための大事なタスク。 **既存研究の多くは学習の特徴数を少なくしている（特徴が多いと爆発する可能性が高くなる） → が、特徴の選択（選別）は欠陥予測へ影響があることが分かっている** → 大規模調査は未実施   
 調査： 5つの教師あり学習モデルと5つの教師なし欠陥予測モデルのパフォーマンスと特徴削減の影響を調査、比較
 
+Tag_Prediction, Tag_Learning, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
+
 九大、京大の先生のサーベイ。欠陥予測はある意味運用・保守の1タスクだが…
 
 curse of dimensionality (次元の呪い: 次元が増えると探索空間も指数的に増えること)
+___
 
-- Title: The Impact of Correlated Metrics on the Interpretation of Defect Models (journal)
+- Title: <font color="orange"> The Impact of Correlated Metrics on the Interpretation of Defect Models </font> (journal)
 >  
 背景： 欠陥モデルはソフトウェアの品質に関する経験的理論を構築するための分析モデル → **モデルから知識の抽出ができることも** → 最近は相関メトリクスが解釈へ影響を与える可能性についての懸念（が、未調査）  
 調査： 14の公的に利用可能な欠陥データセットのケーススタディを調査 → 相関メトリクスの一貫性などへ影響がある
 
+Tag_Modeling, Tag_Learning, Tag_Metrix, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
+
 共同研究で参考になるかも？ 知識の抽出という点で。 論文はIEEEとかからじゃないと閲覧できない模様
+___
 
 # 6/26 (11 absts, total 75 absts)
 
@@ -981,9 +1130,11 @@ curse of dimensionality (次元の呪い: 次元が増えると探索空間も�
 背景： **JITの欠陥予測** は注目度高いで （SZZを利用） → 中のSZZがノイズによって影響を受ける → トレーニング用のラベルが誤ったものになる可能性  
 調査： SZZ（とそのバリアント）の誤ラベルとその影響について調査、10のApache オープンソースプロジェクトじゃら126,526の変更を用いて学習 → SZZによって誤ったラベルが付くと、検査作業に悪影響が発生
 
-Tag_JIT
+Tag_JIT, Tag_Prediction, Tag_Learning, Tag_SZZ, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
 
 SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起こす変更を識別する手法。 主にSZZのサーベイ。
+___
 
 - Title: Which Variables Should I Log? (journal)
 >  
@@ -992,16 +1143,25 @@ SZZ: Sliwerski, Zimmermann, Zeller の頭文字（人名）、バグを引き起
 実装：  
 実験： 9つのJavaプロジェクトで評価、MAPが0.84を超えている
 
+Tag_Logging, Tag_Learning, Tag_Recommend  
+Tag_S_Test, Tag_S_Debug
+
 利用可能変数も識別しないといけないのは静的解析要素もあり面白そう。精度も高いので意外と実用的？
+___
 
 - Title: Understanding the Automated Parameter Optimization on Transfer Learning for Cross-Project Defect Prediction: An Empirical Study (paper)
 >  
 背景： Data-driven な欠陥予測は重要度が増加 → 対象プロジェクトからのデータだけでは学習が十分ではないことも多いので、他のプロジェクトからデータを持ってくることは多い (**CPDP: Cross-Project Defect Prediction**) → が、色々なCPDP技術の自動パラメータ最適化の影響については十分研究されていない  
 調査： 62のCPDP手法の影響を調査、13は他の論文でも調査されているが、49は未調査 → 20以上のソフトウェアプロジェクトで欠陥予測モデルを構築 → 自動化パラメータ最適化は77%のCPDPでパフォーマンス改善に効果的、転移学習はCPDPの肝（費用対効果大）、既存の転移学習と分類手法の組み合わせで代替を見つけられてしまう（CPDPはまだ未成熟）
 
-Tag_CPDP
+Tag_CPDP, Tag_Prediction, Tag_Learning, Tag_Survey  
+Tag_S_Test, Tag_S_Debug
 
 サーベイっぽい論文（TPだけど）。このセクション欠陥予測（＝機械学習の一応用先）がほとんどだったな…
+___
+
+</details>
+</div>
 
 ## I17 Contracts and Analysis
 
@@ -1009,19 +1169,32 @@ Tag_CPDP
 
 ## <font color="orange"> I19 Code Generation and Verification </font> (2 TPs, 2 SEIPs, 2 NIERs)
 
-- Title: Automatically Testing String Solvers (paper)
+<div class="waku">
+<details open>
+
+___
+
+- Title: <font color="orange"> Automatically Testing String Solvers </font> (paper)
 >  
 背景： SMTソルバは多くのテストとか検証の基礎となっているが、ソルバ自身が正確かどうかのチェックはどうするん？    
 実験： 文字列ソルバの実装における健全性（解なしは真に解なし性質）と完全性（誤った解を出力しない性質）を調査。 **ある解が分かっている式を合成 → 解を維持する変換を適用し、ソルバへ食わせてみる** → 効果的な検証になったのでは？
 
+Tag_Solver, Tag_Automation  
+Tag_S_Code_Gen, Tag_S_Verification
+
 ソルバの検証自体は面白い（が、学術的側面が大きい → 直接の実用性は薄め）。 そもそも取り上げた変換がソルバ内でも適用されていればソルバは解けてしまうのでは？
+___
 
 - Title: Co-Evolving Code with Evolving Metamodels (paper)
 >  
 背景： Metamodels はソフトウェア言語 (SL) 構築の土台 → コアAPIコードが生成され、それを用いた高度機能コードを開発者が記述、言語を強化する → 既存アプローチは SLとMetamodel が **共進化 (Co-Evolution)** するとき、コードはハブられる（？）  
 提案手法： 半自動化共進化アプローチ
 
+Tag_Modeling, Tag_Language, Tag_Automation  
+Tag_S_Code_Gen, Tag_S_Verification
+
 共進化: 生物学上は、ハチドリと蘭のような、形質が他種へ依存するように進化する現象のこと、SE的にはメタモデルとSLが互いに影響を与えながら発展することを表現しているのか？  どうにもコードの位置づけがよくわからん（SE的な共進化はよく使われる表現なのかも不明）
+___
 
 - Title: Rule-based Code Generation in Industrial Automation: Four Large-scale Case Studies applying the CAYENNE Method (practice)
 >  
@@ -1030,16 +1203,27 @@ Tag_CPDP
 実装：  
 実験： 数千のセンサを備えた産業プラントに関して4つのケーススタディ → 必要な制御ロジックのうち70%以上を自動生成可能 → コストを最大21%削減可能
 
-制御ロジックの生成なので、プログラミング言語よりも上層（あるいは自然言語かも）の分野。 開発サポートという点ではもう片方のグループ的な視点
+Tag_Dev, Tag_Natural, Tag_Control, Tag_Automation  
+Tag_S_Code_Gen, Tag_S_Verification
 
-- Title: Understanding and Handling Alert Storm for Online Service Systems (practice)
+制御ロジックの生成なので、プログラミング言語よりも上層（あるいは自然言語かも）の分野。 開発サポートという点ではもう片方のグループ的な視点
+___
+
+- Title: <font color="orange"> Understanding and Handling Alert Storm for Online Service Systems </font> (practice)
 >  
 背景： **サービスの障害発生時には、 Alert Storm と言われるアラートの乱立がログとして記録** される → このアラートの集団を解析するのにもコストがかかる  
 提案手法： 大量のアラートデータを分析 → 調査結果から Alert Storm の検出と代表Alertの抽出を行う手法の提案  
 実装：  
 実験： Storm 検出については F値が 0.9 を超えた、 Stromの概要抽出によって調査するAlertを98%削減。 China EverBright Bank のサービス保守に適用（成功例）
 
+Tag_Logging, Tag_Review, Tag_Natural  
+Tag_S_Code_Gen, Tag_S_Verification
+
 ログ解析という点ではワシのグループのテーマとして利用可能（ただし自然言語っぽい感じになりそう）。 具体的なアイデアが書かれていないのが気になるところ
+___
+
+</details>
+</div>
 
 ## I20 Android Testing
 
@@ -1047,14 +1231,23 @@ Tag_CPDP
 
 ## <font color="orange"> I22 Testing </font> (4 TPs, 2 Demos)
 
-- Title: MemLock: Memory Usage Guided Fuzzing (paper)
+<div class="waku">
+<details open>
+
+___
+
+- Title: <font color="orange"> MemLock: Memory Usage Guided Fuzzing </font> (paper)
 >  
 背景： 制御できていないメモリ消費はメモリを食いつぶす可能性がある → **既存のカバレッジ志向では検出できない問題**  
 提案手法： MemLock メモリ消費量をモデリングしたFuzzer、よりメモリ消費量が大きいパスを積極的に探索していく  
 実装：  
 実験： AFL, AFLFast, PerfFuzz, FairFuzz, QSYM などのFuzz手法と比較して、メモリ消費バグを大幅に検出 → 15の新規CVE登録
 
+Tag_Fuzz, Tag_Memory, Tag_AFL, Tag_Modeling  
+Tag_S_Test
+
 4月にワシが読んだ論文。 CVE15個登録は何度聞いてもやべぇ。 ワシの修士論文との完全競合ではないが、実検体で検証できるかの重要性を再認識させられた論文
+___
 
 - Title: Symbolic Verification of Message Passing Interface Programs (paper)
 >  
@@ -1063,16 +1256,24 @@ Tag_CPDP
 実装：  
 実験： 111の実際のMPI検証タスクで評価 → 記号実行オンリー（打ち切り1h）だと 61/111 だが MPI-SVだと 100/111 を検証可能 → プロパティ充足を平均19倍の高速化、プロパティ違反を平均5倍の高速化を達成
 
-モデルチェックのモデル構築のコストとかがどうなるのか気になるところ（最適なモデルを長時間使って作ったんじゃあるまいな？） メッセージパッシングみたいな分散システム関連キーワードも再勉強せにゃなぁ
+Tag_SymExe, Tag_Distribution, Tag_MPI, Tag_Model_Checking  
+Tag_S_Test
 
-- Title: SAVER: Scalable, Precise, and Safe Memory-Error Repair (paper)
+モデルチェックのモデル構築のコストとかがどうなるのか気になるところ（最適なモデルを長時間使って作ったんじゃあるまいな？） メッセージパッシングみたいな分散システム関連キーワードも再勉強せにゃなぁ
+___
+
+- Title: <font color="orange"> SAVER: Scalable, Precise, and Safe Memory-Error Repair </font> (paper)
 >  
 背景： memory leak, double-free, use-after-free などのメモリエラーの修正はツライねんな → 自動プログラム修正技術が解決の可能性を秘めているがまだ不十分（特にスケーラビリティ）  
 提案手法： SAVER C言語用のメモリエラー自動修正手法、 **Object Flow Graph という新しい静的プログラム表現** に基づく → 修正をOFGのラベル付け問題として定式化  
 実装：  
 実験： 産業レベルの静的バグファインダーと組み合わせて評価 → 報告されたエラーの75%は色々なOSS CプログラムについてSAVERで修復可能
 
+Tag_Memory, Tag_Graph, Tag_APR  
+Tag_S_Test
+
 記号実行とかFuzzにおいてグラフ問題への落とし込みが一般的になってきている感がある（単純に解決へのいい影響も多いので）。 自動修正ということはコード生成もしているということ？
+___
 
 - Title: A Large-Scale Empirical Study on Vulnerability Distribution within Projects and the Lessons Learned (paper)
 >  
@@ -1082,13 +1283,25 @@ Tag_CPDP
 実装：  
 実験： ターゲットプロジェクトの10個のゼロデイ発見に役立った
 
+Tag_Fuzz, Tag_Static_Analysis, Tag_Survey  
+Tag_S_Test
+
 サーベイそ側面もありそうな脆弱性解析論文。静的解析と動的Fuzzについては興味あり（動的Fuzzって何だ、静的Fuzzがあるのか？ …まあ記号実行もFuzzの一部っちゃ一部だから静的Fuzzもあるか）
+___
+
+</details>
+</div>
 
 ## I23 Code Artifact Analysis
 
-# 6/30 (* absts, total * absts)
+# 6/30 (18 absts, total 93 absts)
 
 ## <font color="orange"> A21 Testing and Debugging 3 </font> (2 TPs, 4 Journals)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: Schrödinger's Security: Opening the Box on App Developers' Security Rationale (paper)
 >  
@@ -1151,7 +1364,7 @@ ___
 
 - Title: An Empirical Study of the Long Duration of Continuous Integration Builds (journal)
 >  
-背景： CIはソフトウェア開発において迅速なビルドが可能 → 開発者の専従的になってしまう問題がある（特にビルド期間が長くなるほどオーバーヘッドが大きくなる） → ビルドが長くなる背景はあいまい、要調査  
+背景： CIはソフトウェア開発において迅速なビルドが可能 → 開発者の専従的になってしまう問題がある（特にビルド期間が長くなるほどオーバーヘッドが大きくなる） → **ビルドが長くなる背景はあいまい、要調査**  
 調査： CIビルドの長期化に関連する特性を調査 → 一般的な要素（プロジェクトサイズ、チームサイズ、ビルド構成サイズ、テスト密度）だけではなく、ほかにも重要な要素があるでよ
 
 Tag_CI, Tag_Human, Tag_Dev, Tag_Survey  
@@ -1160,11 +1373,19 @@ Tag_S_Test, Tag_S_Debug
 結論が書かれていないではないか(´・ω・\`) なんだかんだCIも色々論じられているなー、という印象。 運用・保守という意味では同じ畑ではある
 ___
 
+</details>
+</div>
+
 ## ~A22 Cognition~
 
 ## A23 Requirements
 
 ## <font color="orange"> A24 Testing and Debugging 4 </font> (2 TPs, 2 Journals, 1 Demo, 2 NIERs)
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: On Learning Meaningful Assert Statements for Unit Test Cases (paper)
 >  
@@ -1216,16 +1437,25 @@ Tag_S_Test, Tag_S_Debug
 記号実行と機械学習の組み合わせは珍しい気がする。が、やっていること自体は誘導に機械学習を用いた、ということなので分離可能な要素同士ではある。
 ___
 
+</details>
+</div>
+
 ## <font color="orange"> P25 Fuzzing </font> (5 TPs)
+
+
+<div class="waku">
+<details open>
+
+___
 
 - Title: Typestate-Guided Fuzzer for Discovering Use-after-Free Vulnerabilities (paper)
 >  
-背景： カバレッジベースのFuzzingでは見つけにくバグにはUaFがあるでよ → カバレッジではなく、ブランチ（エッジ）の順番が重要なため  
+背景： **カバレッジベースのFuzzingでは見つけにくバグにはUaFがあるでよ** → カバレッジではなく、ブランチ（エッジ）の順番が重要なため  
 提案手法： UAFL typestate ベースのFuzzer → 静的 typestate解析とFuzzingでStaging（絞る→実行）  
 実装：  
 実験： AFL, AFLFast, FairFuzz, MOpt, Angora, QSYM と比較してUAF発見にかかる時間を大幅に改善。 未知の10個の脆弱性の発見、5つのCVE登録
 
-Tag_Fuzz, Tag_AFL, Tag_Pointer, Tag_Anti_Covarage  
+Tag_Fuzz, Tag_AFL, Tag_Pointer, Tag_Anti_Covarage, Tag_Typestate  
 Tag_S_Fuzz, Tag_S_Test
 
 UAFに特化したFuzzer。 typestate automaton と同系の手法（各変数の持つ状態・遷移をオートマトンで表現する手法）と思われる。 問題はCFGが多分intraなのと、オートマトンをどう構築しているのかという部分
@@ -1233,7 +1463,7 @@ ___
 
 - Title: sFuzz: An Efficient Adaptive Fuzzer for Solidity Smart Contracts (paper)
 >  
-背景： Smart Contrast はリリースすると簡単にパッチ当てができない → リリース前に徹底的にテストすべし  
+背景： **Smart Contrast はリリースすると簡単にパッチ当てができない → リリース前に徹底的にテストすべし**  
 提案手法： sFuzz Ethereum 上での Smart Contrast 用のFuzzer。 よりブランチカバレッジを得られるように色々な戦略を採用   
 実装：  
 実験： Solidity 用の他のFuzzerと比較して効率的（2桁程度高速）、高いカバレッジを達成、採用戦略が補完的
@@ -1246,7 +1476,7 @@ ___
 
 - Title: Planning for Untangling: Predicting the Difficulty of Merge Conflicts (paper)
 >  
-背景： マージは破壊的な動作なので時には多くの人が関係することになる（結果、コストがかかる） → マージ解決のためのサポートはあまりない → 競合の予測ができればおいしい  
+背景： マージは破壊的な動作なので時には多くの人が関係することになる（結果、コストがかかる） → マージ解決のためのサポートはあまりない → **競合の予測ができればおいしい**  
 調査： マージ競合の特性を調査、自動的な分類。 128のJavaプロジェクトで発生した6380の競合を分析、学習 → 困難さを予測することを確認（AUC 0.76）
 
 Tag_Version, Tag_Prediction, Tag_Learning, Tag_Metrix  
@@ -1257,7 +1487,7 @@ ___
 
 - Title: Gang of Eight: A Defect Taxonomy for Infrastructure as Code Scripts (paper)
 >  
-背景： Infrastructure-as-Code (IaC) Scripts の欠陥は大規模システムの障害など、重大になる可能性 → 欠陥の分類が修正と防止に寄与する  
+背景： **Infrastructure-as-Code (IaC) Scripts** の欠陥は大規模システムの障害など、重大になる可能性 → 欠陥の分類が修正と防止に寄与する  
 提案手法： 定性分析 (qualitative analysis) を通じた欠陥分類手法、8つのカテゴリ → OSSリポジトリから欠陥関連コミットを1448個収集、分析。 291のリポジトリから80425個のコミットを収集、分析しカテゴリを定量化  
 実装：  
 実験： 分類法を66人の開発者に同意できるか調査 → 冪等性（同じIaCスクリプトが複数回実行されると起きる欠陥）に最も同意
@@ -1268,9 +1498,9 @@ Tag_S_Fuzz, Tag_S_Test
 Fuzzing？ こちらもぱっと見Fuzzingとは直接関係なさげ。 IaCというのは聞きなれないが、アプリケーションにおけるインフラ層で利用されるスクリプトとかと捉えればおｋ？
 ___
 
-- Title: JVM Fuzzing for JIT-Induced Side-Channel Detection (paper)
+- Title: <font color="orange"> JVM Fuzzing for JIT-Induced Side-Channel Detection </font> (paper)
 >  
-背景： タイミングサイドチャネル防止のための研究はソースコードと紐づいていることが多い → が、実際にはJITによってサイドチャネルが発生・導入されてしまうことがある  
+背景： タイミングサイドチャネル防止のための研究はソースコードと紐づいていることが多い → **が、実際にはJITによってサイドチャネルが発生・導入されてしまうことがある**  
 提案手法： Java JITコンパイラによって発生するサイドチャネル攻撃を自動検出するパターンの紹介。 JVM上の動作を探索（Fuzzing）する手法  
 実装：  
 実験： サイドチャネル検出の研究で利用された3つのデータセットで評価 → これまで安全とされてきたコードが実際にはJITによってサイドチャネル攻撃に脆弱 → 過去の4つのツールと矛盾
@@ -1281,15 +1511,23 @@ Tag_S_Fuzz, Tag_S_Test
 JVMでFuzzingするって結構すごいことなのでは？ タイミングサイドチャネル (Timing Side-Channel) 処理時間の差から暗号鍵などを推測する攻撃手法。
 ___
 
+</details>
+</div>
+
 ## P26 Deep Learning Testing and Debugging
 
 ## P27 Applications
 
 ## <font color="orange"> P28 Analysis and Verification </font> (3 TPs, 1 SEIP, 2 Demos)
 
-- Title: Tailoring Programs for Static Analysis via Program Transformation (paper)
+<div class="waku">
+<details open>
+
+___
+
+- Title: <font color="orange"> Tailoring Programs for Static Analysis via Program Transformation </font> (paper)
 >  
-背景： 静的解析は深く研究されてきた手法だが、どうしても近似が必要になり、誤検知が増える → 抑制のための手法があるが、これらは開発者のニーズとかみ合っていない（コメントの追加挿入など） → 洞察: 分析ユーザが持つ背景に関係なく分析に影響を与える能力 → modify code → わずかな変更で誤検出が抑制可能だが、冗長なコードが発生したりする  
+背景： 静的解析は深く研究されてきた手法だが、どうしても近似が必要になり、誤検知が増える → 抑制のための手法があるが、これらは開発者のニーズとかみ合っていない（コメントの追加挿入など） → 洞察: 分析ユーザが持つ背景に関係なく分析に影響を与える能力 → **modify code → わずかな変更で誤検出が抑制可能だが、冗長なコードが発生したりする**  
 提案手法： 汎用的な自動コード変更手法（プログラム変換） → 静的解析器自体はブラックボックス扱い  
 実装：  
 実験： C, Java, PHP をサポートする5つの静的解析器を実世界のプログラム (>800KLoc) で評価 → 長期的な複雑課題を回避するのに効果的
@@ -1302,7 +1540,7 @@ ___
 
 - Title: BCFA: Bespoke Control Flow Analysis for CFA at Scale (paper)
 >  
-背景： 多くのソースコード解析において、CFGに対して分析を行う、というのが一般的 → が、検査対象のCFGが数百万にもなると解析コストがバカにならない → CFGのトラバーサル戦略が固定だとマッチしない（効率的なトラバースができない）CFGが出てくる。  
+背景： 多くのソースコード解析において、CFGに対して分析を行う、というのが一般的 → が、検査対象のCFGが数百万にもなると解析コストがバカにならない → **CFGのトラバーサル戦略が固定だとマッチしない（効率的なトラバースができない）CFGが出てくる**  
 提案手法： Bespoke Control-Flow Analysis (BCFA) 制御フロー解析を用いて、各CFGに対して最も効率的なトラバース戦略を選択  
 実装： Boa  
 実験： 287,000 と 162.000,000 のCFGを持つ二つのデータセットについて解析を実施 → BCFAは1-28%程度の高速化が可能、オーバーヘッドも0.2%未満と低い、予測ミスは0.01%未満
@@ -1315,7 +1553,7 @@ ___
 
 - Title: On the Recall of Static Call Graph Construction in Practice (paper)
 >  
-背景： 静的解析では動的要素のモデリングが必要になるが、これが難しいねんな → 難しいってのは議論されているが、どんな影響を与えるのかは未調査  
+背景： 静的解析では動的要素のモデリングが必要になるが、これが難しいねんな → **難しいってのは議論されているが、どんな影響を与えるのかは未調査**  
 調査： 実世界のJavaプログラムのセットを用いてCall Graph構築する上での問題を調査、どの言語機能がFNにつながるのか調査 → recall の中央値は0.884, 組み込みテストの方が合成テストよりも動作モデルを明確にする、追加の静的解析はあまり影響しない、動的要素をサポートしているかでrecallが大きく向上する（が、パフォーマンスは低下する）、unsoundnessの主な原因はreflected methodではなく、JVMから始まるmethod call
 
 Tag_Static_Analysis, Tag_Modeling, Tag_Survey  
@@ -1324,12 +1562,23 @@ Tag_S_Analysis, Tag_S_Verification
 あくまでCall Graph構築を一例に調査した、ということなんだろうけど、得られた知見がCG構築の例と近すぎて、一般化できてなくない？ ほかの静的解析で得られる知見は全然異なる可能性が高いし
 ___
 
+# 7/1 (11 absts, total 104 absts)
+
 - Title: DeCaf: Diagnosing & Triaging Performance Issues in Large-Scale Cloud Services (practice)
 >  
-背景：  
-提案手法：  
+背景： 大規模クラウドサービスはパフォーマンス追跡・監視のために KPIs (Key Performance Indicators) を利用する。 **コードバグなどで達成度合いの遅れ（つまり、KPIの低下）が生じた場合に、問題の切り分け・診断（とそのコストの最小化）が重要 → 問題には色々関連性が波及しているので自動/手動の診断は簡単ではない**  
+提案手法： DeCaf KPI問題の自動診断とトリアージ（問題の切り分けと優先順位付け）システム → 機械学習とパターンマイニングを利用  
 実装：  
-実験：
+実験： Microsoftの2つの大規模クラウドシステム上の10個の既知の問題と31個の未知の問題を診断したケーススタディ → 大量のサービスログとその属性付けがスケール、多種なKPIとランキング関数をサポート
+
+Tag_Learning, Tag_Cloud, Tag_Dev, Tag_Logging  
+Tag_S_Analysis, Tag_S_Verification
+
+ジャンルとしてはClassificationに当たるのか？
+___
+
+</details>
+</div>
 
 ## P29 Android and Web Testing
 
@@ -1339,47 +1588,92 @@ ___
 
 ## <font color="orange"> A26 Bugs and Repair </font> (2 TPs, 4 Journals)
 
+<div class="waku">
+<details open>
+
+___
+
 - Title: Simulee: Detecting CUDA Synchronization Bugs via Memory-Access Modeling (paper)
 >  
-背景：  
-提案手法：  
+背景： **CUDAの同期バグの効率的な検出は未解決問題**  
+提案手法： Simulee CUDA同期バグ検出フレームワーク → LLVMを解析、メモリアクセス情報を収集  
 実装：  
-実験：
+実験： Github上の7つのCUDA関連プロジェクトでベンチマークを構築・評価。 手動で識別済みの24のバグのうち21個を検出、未知のバグ24個を検出（10個は確認済み）
+
+Tag_CUDA, Tag_Efficiency, Tag_Debug, Tag_Sync  
+Tag_S_Debug, Tag_S_Repair
+
+同期（raceとか）問題のフレームワーク。 同期だから動的かと思っていたが、LLVMコードを解析しているあたり静的要素のほうが強いか？
+___
 
 - Title: Fine-Grained Dynamic Resource Allocation for Big-Data Applications (journal)
 >  
-背景：  
-提案手法：  
+背景： ビッグデータアプリでは大規模な並列計算を実行 → **有名なフレームワークとしてSparkがあるが、Sparkはリソース設定(allocation)を動的に変更できない → アプリの応答時間がデッドラインを超える一因になりえる**  
+提案手法： dynaSpark Sparkのリソース拡張版 → アプリケーションへ割り当てる (allocate) リソースを動的に決定 → 不測の事態に対処しやすい → 高速なリソース割り当てにチャレンジ  
 実装：  
-実験：
+実験： リソースの効率的な割り当てと、動的割り当てによる期限違反 (deadline violations) の減少を確認
+
+Tag_Distribution, Tag_Spark, Tag_Resource  
+Tag_S_Debug, Tag_S_Repair
+
+リソース分配を可能にした並列アプリの拡張。 最初はタスク割り当てのバランシングかとも思ったが違う模様。 Sparkというのは有名なんだろうか。
+___
 
 - Title: The Assessor's Dilemma: Improving Bug Repair via Empirical Game Theory (journal)
 >  
-背景：  
-提案手法：  
+背景： 優先インフレが発生すると、開発者の時間割り当てが狂うことになる  
+提案手法： **Empirical Game-Theoretic Analysis (EGTA: 経験的ゲーム理論解析) をSEの優先インフレへ適用** → 新しい優先順位付けプロセス  
 実装：  
-実験：
+実験： （真に）優先度の高いタスクの97%が解決できるようになった
+
+Tag_Human, Tag_Review, Tag_Learning, Tag_Game_Theory, Tag_Dev  
+Tag_S_Debug, Tag_S_Repair
+
+Priority Inflation: 例えば報告するバグに優先順位を付ける環境下で、多くのバグが報告されると優先度の高いバグしか参照されなくなり（結果的に低優先度は無視されるのが嫌で）、どんなバグでも優先度が高く報告されてしまう状況など。  
+どのようにゲーム理論を適用したのかは分らぬまま（ある意味開発者心理学に近い、のか？）。 あと何で評価したのかAbstではサッパリわからん
+___
 
 - Title: FixMiner: Mining Relevant Fix Patterns for Automated Program Repair (journal)
 >  
-背景：  
-提案手法：  
+背景： パッチ自体は何度も適用されるので再利用性が抽出できて自動修復に導ければ嬉しい → **が、類似性抽出などと自動プログラム修正技術は、入力の扱いなどで組み合わせがムズイ**  
+提案手法： FizMiner パターンマイニングを利用して他のパッチ生成システムで活用できるパッチ修正パターンの推測 → コード変更のASTやらスクリプトのツリー情報などを利用  
 実装：  
-実験：
+実験： OSSプロジェクトから数千のパッチを収集・評価 → 正確なマイニングができてそう。 Defect4Jの26個のバグも修正できるようになったでよ
+
+Tag_Learning, Tag_Patch, Tag_Automation, Tag_Defect4J, Tag_APR  
+Tag_S_Debug, Tag_S_Repair
+
+あくまで論点はAPRの入力とできるようなパッチパターンのマイニング。が、後々パッチ生成もしている（こんがらがってきた）
+___
 
 - Title: IntRepair: Informed Repairing of Integer Overflows (journal)
 >  
-背景：  
-提案手法：  
+背景： 整数オーバーフローは長年の脅威  
+提案手法： IntRepair **Cコードのオーバーフローを静的記号実行を用いて検出・自動修復する手法**  
 実装：  
-実験：
+実験： SAMATE Juliet テストスイートの2052個のCコード（計100万行ぐらい）と最大20KLoCの合成ベンチ50個に適用 → 正常に検知・修正、コードサイズの増加は1%程度。 30人のユーザ調査も実施 → 手動の10倍以上の効率
+
+Tag_SymExe, Tag_Overflow, Tag_Repair, Tag_Automation  
+Tag_S_Debug, Tag_S_Repair
+
+検出と自動修正ができるのはオーバーフローの修正がパターン化されているため？ 懸念はどれだけ偽陽性があるのかってところくらい（疑わしきは修正のはず） → エラーハンドリングも組み込んでいるなら修正済みコードが動的パフォーマンスの悪化を招かないか？
+___
 
 - Title: DLFix: Context-based Code Transformation Learning for Automated Program Repair (paper)
 >  
-背景：  
-提案手法：  
+背景： APRは開発と保守において役立つ → **DLは発達してきたが、APRの場合、バグ修正のコード周辺のコンテキストの学習が制限** → 修正位置・修正が不正確に  
+提案手法： DLFix 以前のバグ修正とその*周辺コンテキスト*から学習する2層DLモデル（1st層はコンテキスト学習のRNN、2nd層はコード変化の学習モデル）  
 実装：  
-実験：
+実験： Defect4J、Bugs.jar、8つのプロジェクトのそれぞれのデータセットで評価（vs 13 state-of-the-art Approaches） → 11/13 で改善、他二つとは互いに補完的な結果
+
+Tag_Learning, Tag_Defect4J, Tag_Repair, Tag_APR  
+Tag_S_Debug, Tag_S_Repair
+
+バグ修正だけでなく、周辺のコンテキストも学習するようにした（できるようにした？）のが新規性。 度々出てくるDefect4Jはどういうバグが内包されてんだろ？
+___
+
+</details>
+</div>
 
 ## A27 Software Architecture
 
@@ -1387,33 +1681,64 @@ ___
 
 ## <font color="orange"> A29 Code Analysis and Verification </font> (4 TPs, 1 NIER)
 
+<div class="waku">
+<details open>
+
+___
+
+
 - Title: Heaps'n Leaks: How Heap Snapshots Improve Android Taint Analysis (paper)
 >  
-背景：  
-提案手法：  
-実装：  
-実験：
+背景： フロー解析はAndroidアプリの分析に不可欠 → 静的汚染解析が多め → ポインタの指し先が不正確になりがちで、悪影響あり → **動的ヒープスナップショットを補助的に与えると解析精度が向上することが分かってきた**  
+調査： 動的ヒープスナップショットが静的汚染解析にも効果（健全性と精度について）があるのかを調査 → FlowDroidを拡張、ヒープスナップショットを組み込み → DroidMacroBenchで評価 → 精度向上と解析の効率化を観測、精度と健全性トレードオフが優良化、単一スナップショットよりも複数スナップショットの方がトレードオフがより優れる
+
+Tag_Android, Tag_Taint_Analysis, Tag_Pointer, Tag_Heap, Tag_Survey  
+Tag_S_Analysis, Tag_S_Verification
+
+静的解析に動的解析の補助を入れるという比較的直観通りの調査（ヒープ内部のオブジェクト情報を与えることで、ヒープを分化できる）。 スナップショットを取るオーバーヘッドは、まあ静的解析全体から見れば誤さっちゃ誤差か
+___
 
 - Title: Verifying Object Construction (paper)
 >  
-背景：  
-提案手法：  
+背景： オブジェクト指向言語において、コンストラクタ記述の手間を減らすためにデザインパターンを利用することが多いが、**コンパイラによって隠蔽されてしまう部分が発生 → 結果的にセキュリティホールを見落としたり、クラッシュの原因を見落としたりする可能性**  
+提案手法： ビルダーパターンなどのオブジェクト構築の利用を静的に検証する手法 → 仕様言語から引数の組み合わせを指定 → 非安全なコンストラクタ構築コードを検出  
 実装：  
-実験：
+実験： （計？）900万行以上のコードで評価 → 未知のセキュリティ脆弱性やヌルぽ違反などを発見、FPは少なめでアノテーションの負担も低い
+
+Tag_Typestate, Tag_Language, Tag_Design_Pattern  
+Tag_S_Analysis, Tag_S_Verification
+
+実際コンストラクタの記述って手間、ここは同意。で、要するに提案しているのもアノテーションベースなわけだが、注釈の負担が少ないは本当か？
+___
 
 - Title: When APIs are Intentionally Bypassed: An Exploratory Study of API Workarounds (paper)
 >  
-背景：  
-提案手法：  
+背景： APIは色んな所で使われているわけだが、時に様々な要素によってAPIを切り替えるユーザが存在 → このとき、ユーザと開発者の間にチャンネルがない → **ユーザがコミュニティなどで問い合わせた内容が開発者へ共有されないこともある（バグの見逃しにもつながる）**  
+提案手法： Stack OverflowでのAPI回避策の問い合わせについての解説（8つの一般的な問い合わせ理由と8つの解決策） → 得られた知見からAPI回避策の実装パターンの開発  
 実装：  
-実験：
+実験： 現実世界のOSSプロジェクトでパターンのインスタンスを特定、API開発者視点での価値を判断
 
-- Title: Demystify Official API Usage Directives with Crowdsourced API Misuse Scenarios, Erroneous Code Examples and Patches (paper)
+Tag_StackOverflow, Tag_API, Tag_Dev, Tag_Human  
+Tag_S_Analysis, Tag_S_Verification
+
+API Workarounds はここでは何かしら不都合のあるAPIの使用を避ける方法（もしくは代替法）のことを指している、でいいのか。 パターンマイニングしているのかは不明
+___
+
+- Title: <font color="orange"> Demystify Official API Usage Directives with Crowdsourced API Misuse Scenarios, Erroneous Code Examples and Patches </font> (paper)
 >  
-背景：  
-提案手法：  
+背景： APIにはそれの使い方やらを記載した **自然言語のガイドラインなどが存在 → が、APIの誤用シナリオの原因が存在** → 使用コンテキストの欠如、協調APIとの関係、API間の微妙な違い  
+提案手法： Stack Overflow でのAPI誤用シナリオを発見するテキストマイニング手法 → 誤ったコード例、パッチ、関連APIの抽出を行い、自然言語のレポートを生成  
 実装：  
-実験：
+実験： 3148クラス、7471メソッド → 23969 API使用 → 159116 誤用シナリオを抽出。 8つのAPI誤用に関するレポートを14人の開発者へ見せ調査 → 誤用エラーを高速かつ正確に把握できた
+
+Tag_Learning, Tag_Natural, Tag_API  
+Tag_S_Analysis, Tag_S_Verification
+
+提案したのは、誤用シナリオを発見するテキストマイニング（つまり、学習の結果、誤用か否かを判断している）。 マニュアルやガイドラインもある意味開発の重要な要素ではある。
+___
+
+</details>
+</div>
 
 ## A30 Dependencies and Configuration
 
