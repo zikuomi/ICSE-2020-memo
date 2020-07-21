@@ -61,48 +61,75 @@ A key objective of our work is to demonstrate the broad feasibility, applicabili
 
 ## 2 Motivation
 
-Fig. 2a illustrates a past issue in PHPStan, a popular PHP analyzer. A file is opened in line 2, and assigned to a handle $file inside the if-condition on line 2. If opening the file fails, $file is assigned the value false; the condition evaluates to true and the function immediately returns (line 3). On the other hand, if execution passes the check then $file is guaranteed to be valid (i.e., not false). The problem is that PHPStan would not track the effect of assignments in if-conditions, and reports an error saying that $file may be false when passed as an argument to fputcsv on line 7.
+Fig. 2a illustrates a past issue in PHPStan, a popular PHP analyzer. A file is opened in line 2, and assigned to a handle `$file` inside the if-condition on line 2. If opening the file fails, `$file` is assigned the value `false`; the condition evaluates to `true` and the function immediately returns (line 3). On the other hand, if execution passes the check then `$file` is guaranteed to be valid (i.e., not `false`). The problem is that PHPStan would not track the effect of assignments in if-conditions, and reports an error saying that `$file` may be `false` when passed as an argument to `fputcsv` on line 7.
 
 ```php
 function test () : void {
-  if (( $file = @fopen ('file ', 'wb+') ) === false ) {
+  if (( $file = @fopen ('file ', 'wb+') ) === false ) { //l2: open file (PHPStan would't consider the effect of assignments)
     return ;
   }
 
   // analyzer complains that $file may be false
-  if (\ fputcsv ($file , [1 ,2 ,3]) === false ) {
-    \ fclose ( $file ) ;
+  if (\fputcsv ($file , [1 ,2 ,3]) === false ) {
+    \fclose ( $file ) ;
     return ;
   }
   ...
-  \ fclose ( $file ) ;
+  \fclose ( $file ) ;
 }
 ```
+Fig 2a Code<br>
+PHPStanの誤検知の例。 2行目を通過して7行目に行く場合、代入処理を考慮できないので`$file`が`false`となる可能性を指摘してしまう。
 
-The issue for this false positive stayed open and unresolved for over a year on GitHub, and is cross-referenced in 13 related user-reported issues.(\*4) One project member responded that the issue is important and will be fixed in the future, but that “no one has yet figured out how to implement it without rewriting major part of the (analysis) core”. The fix imposed significant effort on analysis authors which delayed a resolution for months. Although some analysis authors were in favor of code that avoided assignments in conditionals, others found the style improves readability. Multiple users noted that the false positive can be avoided by a code change that extracts the assignment out of the conditional (Fig. 2b).(\*5) However, one user also noted that this workaround was “a bit annoying” because it introduced redundancy. The proposed workaround also imposes a burden on the user to identify and refactor all affected instances. Our approach introduces a new way to address these tensions. The intuition is that workarounds via code changes, as in Fig. 2b, can generalize to cater for individual user preferences and overcome long-standing analysis issues. The high level idea is to write simple, declarative syntactic templates that can blanket-apply automatically over an entire code base. Although the code changes could be persisted in the code, they need not be: our approach foremost promotes code changes as a temporary suppression mechanism with respect to a particular analysis. In our approach, a match template specifies a pattern that is syntactically close to the problematic pattern in Fig. 2a:
+The issue for this false positive stayed open and unresolved for over a year on GitHub, and is cross-referenced in 13 related user-reported issues.(\*4) One project member responded that the issue is important and will be fixed in the future, but that “no one has yet figured out how to implement it without rewriting major part of the (analysis) core”. **The fix imposed significant effort on analysis authors which delayed a resolution for months.** Although some analysis authors were in favor of code that avoided assignments in conditionals, others found the style improves readability. **Multiple users noted that the false positive can be avoided by a code change that extracts the assignment out of the conditional (Fig. 2b)**.(\*5) However, one user also noted that this workaround was “a bit annoying” because it introduced redundancy. The proposed workaround also **imposes a burden on the user to identify and refactor all affected instances**. Our approach introduces a new way to address these tensions. The intuition is that workarounds via code changes, as in Fig. 2b, can generalize to cater for individual user preferences and overcome long-standing analysis issues. The high level idea is to write simple, declarative syntactic templates that can blanket-apply automatically over an entire code base. Although the code changes could be persisted in the code, they need not be: our approach foremost promotes code changes as a temporary suppression mechanism with respect to a particular analysis. In our approach, a match template specifies a pattern that is syntactically close to the problematic pattern in Fig. 2a:
 
+```php
+function test () : void {
+  $file = @fopen ('file ', 'wb+') ;
+  if ( $file === false ) {
+    return ;
+  }
+  ...
+}
 ```
-Code
+Fig 2b Code<br>
+上記の誤検出を回避する一例。代入と条件式を分離した。
+
+```php
+if ((:[v] = :[fn](:[args]) ) === false )
 ```
+上記問題(図2a)に対する検出テンプレート例
 
 (\*4) https://github.com/phpstan/phpstan/issues/647 <br>
 (\*5) https://github.com/phpstan/phpstan/issues/1739
 
+PHPStanのこの問題は1年以上未解決だった（解析のコア部分の修正方法の模索に大きなコストが発生）。 コードの書き換えでこれが回避可能ではある（図2b）が、そのためにリファクタリングを強要するのか、という問題が発生。 → 本稿の提案手法につながる（解析用one-offリファクタリングの自動化）
+
 A rewrite template replaces all instances of the match template, extracting the assignment out of the if-condition. The rewrite template is syntactically close to the pattern suggested by the user in Fig. 2b:
 
+```php
+:[v] = :[fn](:[args]) ;
+if (:[v] === false )
 ```
-Code
-```
+上記問題(図2b)に対する書き換えテンプレート例
 
-The match template matches on the syntactic pattern where variable v is assigned the return value of calling a function fn with arguments args (the :[identifier] notation binds matching syntax to a variable identifier). All other syntax is matched concretely; whitespace in the template matches all contiguous whitespace in the source code. For illustration we use this template to match on function call syntax because the analysis particularly tracks values for modeled functions like fopen. The rewrite template references variables in the match template, which are substituted with their corresponding matched syntax.
+The match template matches on the syntactic pattern where **variable `v`** is assigned the return value of calling a **function `fn` with arguments `args`** (the **`:[identifier]` notation binds matching syntax to a variable identifier**). All other syntax is matched concretely; **whitespace in the template matches all contiguous whitespace in the source code**. For illustration we use this template to match on function call syntax because the analysis particularly tracks values for modeled functions like `fopen`. The rewrite template references variables in the match template, which are substituted with their corresponding matched syntax.
 
-Using the above patterns we identified and rewrote 27 instances of the if-assign pattern in the WordPress and PHPExcel projects and removed 82 false positives due to issue #647 in PHPStan. Our approach has the positive effect of removing more false positives than matches, because the issue has a cascading effect of reporting false positives along multiple execution paths (we elaborate in Section 4).
+変数vや引数argsなどをパターンから検出（空白の連続も処理可能）
 
-Writing these declarative patterns is comparatively easy to implementing additional analysis reasoning and sufficiently general for overcoming analysis shortcomings. The format of syntactic templates is accessible to developers; indeed templates can be written in a format that is syntactically close to user-identified and user-implemented workaround transformations (as in Fig. 2b). In our experience, complex changes to an analysis implementation can have a correspondingly easy resolution via code transformation patterns; templates can be developed in minutes for issues that take days to months to resolve in an analysis implementation (or even issues that don’t have any proposed solution whatsoever).(\*6)
+**Using the above patterns we identified and rewrote 27 instances of the if-assign pattern in the WordPress and PHPExcel projects and removed 82 false positives due to issue #647 in PHPStan.** Our approach has the positive effect of removing more false positives than matches, because **the issue has a cascading effect of reporting false positives along multiple execution paths** (we elaborate in Section 4).
+
+実際にこのテンプレートで82の誤検知を抑制（しかもこの誤検知はカスケード≒他所へ伝播するので、他の誤検知の抑制にも効果的）
+
+**Writing these declarative patterns is comparatively easy to implementing additional analysis reasoning and sufficiently general for overcoming analysis shortcomings.** The format of syntactic templates is accessible to developers; indeed templates can be written in a format that is syntactically close to user-identified and user-implemented workaround transformations (as in Fig. 2b). In our experience, complex changes to an analysis implementation can have a correspondingly easy resolution via code transformation patterns; **templates can be developed in minutes for issues that take days to months to resolve in an analysis implementation (or even issues that don’t have any proposed solution whatsoever).**(\*6)
 
 (\*6) See, e.g., https://github.com/spotbugs/spotbugs/issues/493
 
-Match and rewrite templates appear simple, but express nontrivial syntactic properties that go beyond the capabilities of regular expression search-and-replace. We use recent work in syntax transformation to enable this approach for multiple languages and apply it broadly toward our objective.
+宣言的にパターンを書くことは解析器に手を入れるより比較的簡単、分析の欠点を克服するのに十分に一般的。解析器の改良には数日から数か月かかるが、テンプレートなら数分やで
+
+Match and rewrite templates appear simple, but **express nontrivial syntactic properties that go beyond the capabilities of regular expression search-and-replace**. We use recent work in syntax transformation to enable this approach for multiple languages and apply it broadly toward our objective.
+
+一見テンプレートは簡単に見えるが、実際には正規表現などを超える簡単じゃない(nontrivial)構文プロパティを表現してる。
 
 ## 3 Approach
 
@@ -110,97 +137,163 @@ This section explains the overall process of our program tailoring approach. We 
 
 ### 3.1 Preliminaries: Lightweight Syntax Transformation
 
-To rewrite syntax declaratively in the fashion shown, we use comby,(\*7) a tool for declaratively rewriting syntax with templates. We give a brief overview of template syntax and matching behavior:
+To rewrite syntax declaratively in the fashion shown, we use ***comby***,(\*7) a tool for declaratively rewriting syntax with templates. We give a brief overview of template syntax and matching behavior:
 
 (\*7) https://comby.dev
 
-- The :[hole] syntax binds matched source code to an identifier hole. Holes match all characters (including whitespace) lazily up to its suffix (analogous to .\*? in regex), but only within its level of balanced delimiters. For example, {:[hole]} will match all characters inside balanced braces. Parentheses and square brackets are also treated as balanced delimiters.
-- :[[hole]] matches only alphanumeric characters in source code, analogous to \w+ in regex. • Using the same identifier hole multiple times in a match template adds the constraint that matched values be equal.
-- All non-whitespace characters are matched verbatim.
-- Any contiguous whitespace (spaces, newlines, tabs) in a match template matches any contiguous whitespace in the source code. Match templates are thus sensitive to the presence of whitespace, but not the exact layout (the number of spaces do not need to correspond exactly between match template and source code).
-- Matching is insensitive to comments in the source code; comments are treated like whitespace when matching nonhole syntax in the match template.
+下記構文はcombyの一致構文の流用（が、調べてみるとcombyの作者と本著者は同じ人 Tonder）
 
-We additionally use rules to refine match and rewrite conditions. Rules place constraints on matched syntax; we explain rules as needed in the rest of the paper. The match template, rewrite template, and rule comprise the full input for a single transformation. Each part is passed on the command-line.
+- The `:[hole]` syntax binds matched source code to an **identifier hole**. Holes match all characters (including whitespace) lazily up to its **suffix (analogous to `.\*?` in regex)**, but only within its level of **balanced delimiters**. For example, `{:[hole]}` will match all characters inside balanced braces. **Parentheses and square brackets are also treated as balanced delimiters**.
+
+正規表現チックに識別子をバインド可能。レベルは balanced delimiters (カッコとか)で調整可能。
+
+- `:[[hole]]` matches **only alphanumeric characters in source code**, analogous to \w+ in regex.
+- Using the same identifier hole multiple times in a match template **adds the constraint that matched values be equal**.
+- **All non-whitespace characters are matched verbatim**.
+- **Any contiguous whitespace (spaces, newlines, tabs) in a match template matches any contiguous whitespace in the source code**. Match templates are thus sensitive to the presence of whitespace, but not the exact layout (the number of spaces do not need to correspond exactly between match template and source code).
+- Matching is insensitive to comments in the source code; **comments are treated like whitespace when matching nonhole syntax in the match template**.
+
+コメントは無視される
+
+We additionally use rules to refine match and rewrite conditions. **Rules place constraints on matched syntax**; we explain rules as needed in the rest of the paper. The match template, rewrite template, and rule comprise the full input for a single transformation. **Each part is passed on the command-line**.
 
 ### 3.2 Tailoring Programs for Analysis
 
 This section explains our approach to tailoring programs for analysis. Fig. 3 illustrates the main phases in our approach; we use it to characterize the process in detail.
 
-Who writes templates? Our approach starts with a manual step where users 1 write transformation templates. A key principle of our approach is to allow particularly analysis users to influence static analyses via program transformation. The simplicity of declarative templates make syntax transformation accessible so that user observations and workarounds (as in Fig. 2b) can be straightforwardly implemented. This primitive is not exclusive to analysis users, but also accessible to analysis writers and external contributors. For example, analysis writers can create and distribute transformation templates for issues on an interim basis (such as for Fig. 2a). Users can then apply these templates as a temporary workaround before analyzing their projects. In this paper, we (the authors) develop and evaluate transformations as external contributors—we treat analyses as a black box (as a user would) and develop transformations for extant issues in popular analyzers (as an analysis writer might).
+**Who writes templates?**  
+Our approach starts with a manual step where users 1 write transformation templates. A key principle of our approach is to allow particularly analysis users to influence static analyses via program transformation. The simplicity of declarative templates make syntax transformation accessible so that user observations and workarounds (as in Fig. 2b) can be straightforwardly implemented. This primitive is not exclusive to analysis users, but also accessible to analysis writers and external contributors. For example, analysis writers can create and distribute transformation templates for issues on an interim basis (such as for Fig. 2a). Users can then apply these templates as a temporary workaround before analyzing their projects. **In this paper, we (the authors) develop and evaluate transformations as external contributors—we treat analyses as a black box (as a user would) and develop transformations for extant issues in popular analyzers (as an analysis writer might).**
 
-What properties do templates have? Writing rewrite templates 2 is a one-off exercise per transformation. Templates are generally short (we develop templates that are between 3 and 15 lines long). Our results show that there is typically a one-to-one correspondence of rewrite template to analysis issue, where an analysis issue can entail a general problem in analysis implementation, code generation, or function modeling. Formulating rewrite templates requires competitively low effort compared to implementing complex changes analysis-side.
+解析ユーザが変換テンプレートを記述することを想定。もちろん、解析器の開発者がテンプレートを作って配布するのもあり。本稿では著者が記述したテンプレートを用いて、解析器自体はブラックボックス扱いで評価。
 
-Templates are customizable. For example, we can refine the template if ((:[v] = :[fn](:[args])) === false) to match on a particular concrete function, such as fopen, instead of :[fn]. Rudimentary mechanisms (e.g., C macros, comments, or assertions [16], and bug auto-patching [4]) have been used and recommended for suppressing false positives in existing analyzers [3, 6]. These mechanisms suffer from relying on language-specific features, are brittle and coarse, and built into the tool or hardcoded in the program. Our template-based mechanism is broadly accessible (it is easy to write templates), customizable, and generic across languages for manipulating syntax. It operates independent of language toolchains and does not presume the availability of language-specific features (e.g., macros) and does not prescribe any configuration for external analysis tools or compilers. Templates currently express purely syntactic properties (e.g., we do not draw on type information to inform manipulation). However, future work may incorporate richer static information.
+**What properties do templates have?**  
+Writing rewrite templates 2 is a one-off exercise per transformation. Templates are generally short (we develop templates that are between 3 and 15 lines long). **Our results show that there is typically a one-to-one correspondence of rewrite template to analysis issue, where an analysis issue can entail a general problem in analysis implementation, code generation, or function modeling.** Formulating rewrite templates requires competitively low effort compared to implementing complex changes analysis-side.
 
-A set of templates form a catalog of transformations that can be reused across projects using analyses. A catalog is the starting point for an automated pipeline, driving the remaining phases in Fig. 3. In this paper we present a catalog of human-written templates that directly targets known analysis issues.
+テンプレート自体は短い（3～15行程度）。一つのテンプレートは解析器の一つの問題（実装、コード生成、関数モデリングなど）と対応している。
 
-What are the principles behind automated code changes tailored to analysis? The rewriter tool 3 takes as input the set of rewrite templates and a program. It rewrites matched syntax in the original program to produce a modified program that will be analyzed. The modified program is intended to be a temporary representation of the original program that is discarded after analysis. In practice users can identify transformational workarounds to issues (as in Section 2), but do not want to persists those changes in their code.(\*8) Our solution provides the ability where users only temporarily change their code under analysis. We implement temporary program modification by running the rewriter on a version controlled project (we use git). After running the analysis and capturing the bug reports, the project is reverted to its original state. As a practical concern, program tailoring could be integrated into testing and continuous integration pipelines or local development workflows. We envision that the approach is better suited to continuous integration pipelines that typically integrate long-running analyses.
+Templates are customizable. For example, we can refine the template `if ((:[v] = :[fn](:[args])) === false)` to match on a particular concrete function, such as `fopen`, instead of `:[fn]`. Rudimentary mechanisms (e.g., C macros, comments, or assertions [16], and bug auto-patching [4]) have been used and recommended for suppressing false positives in existing analyzers [3, 6]. These mechanisms suffer from relying on language-specific features, are brittle and coarse, and built into the tool or hardcoded in the program. Our template-based mechanism is broadly accessible (it is easy to write templates), customizable, and generic across languages for manipulating syntax. **It operates independent of language toolchains and does not presume the availability of language-specific features (e.g., macros) and does not prescribe any configuration for external analysis tools or compilers.** Templates currently express purely syntactic properties (e.g., we do not draw on type information to inform manipulation). **However, future work may incorporate richer static information.**
+
+テンプレートはカスタマイズ可能（例えば、`:[fn]`を`fopen`に具体化するとか）。現在は言語固有の機能（マクロなど）などとは独立している（コンパイラなどの規定がない）、が Future work として色々な静的情報を利用する可能性はある。
+
+A set of templates form a catalog of transformations that can be reused across projects using analyses. A catalog is the starting point for an automated pipeline, driving the remaining phases in Fig. 3. **In this paper we present a catalog of human-written templates that directly targets known analysis issues.**
+
+テンプレートのカタログは自動化の入り口となる。本稿では既知の分析問題を解消するテンプレのカタログを用意（人間が書いたもの）
+
+**What are the principles behind automated code changes tailored to analysis?**  
+The rewriter tool 3 takes as input the set of rewrite templates and a program. It rewrites matched syntax in the original program to produce a modified program that will be analyzed. **The modified program is intended to be a temporary representation of the original program that is discarded after analysis.** In practice users can identify transformational workarounds to issues (as in Section 2), but do **not want to persists those changes in their code**.(\*8) Our solution provides the ability where users **only temporarily change their code under analysis**. We implement temporary program modification by running the rewriter on a version controlled project (we use git). After running the analysis and capturing the bug reports, the project is reverted to its original state. **As a practical concern, program tailoring could be integrated into testing and continuous integration pipelines or local development workflows. We envision that the approach is better suited to continuous integration pipelines that typically integrate long-running analyses.**
 
 (\*8) For example, one user user experience identifies that a certain change removes a false positive report, but they do not want to permanently change their code https://github.com/Microsoft/CodeContracts/issues/255
 
-In this paper we consider transformations primarily as a targeted suppression mechanism for analysis false positives. However, we observe that transformations can also be tailored to surface additional bugs (we elaborate in Section 4).
+前述の通り、テンプレを用いた調整は解析にのみ利用され、解析後は破棄される（調整前のコードに戻る）。このプログラムの調整はテストはCIパイプラインに組み込み可能で、長期実行解析を組み込んでいるCIパイプラインよりも適していると想定。
 
-The rewriter can be seen as a preprocessor for analyses. One principle of running our approach prelude to analysis is that we can dually use templates to search for and detect (but not necessarily rewrite) problematic syntactic patterns. This mechanism provides an early smoke signal that may trip particular analyzers even before the analysis runs. We notably reuse our templates to detect false positive-inducing patterns across projects in our evaluation. Large scale efforts can similarly detect the extent of possibly affected projects when adopting a new analyzer; analysis writers may use it to prioritize analysis fixes. These capabilities are notable in contrasting our approach to existing mechanisms: syntactic templates are valuable in explicitly codifying sensitivities of analysis behavior as it relates to program structure, whereas suppression-by-comments and configuration options provide an escape hatch in anticipation of problematic analysis interactions where program structure is readily ignored.
+In this paper we consider transformations primarily as a targeted suppression mechanism for analysis false positives. However, **we observe that transformations can also be tailored to surface additional bugs** (we elaborate in Section 4).
 
-What are the conditions for analyzing a modified program? Automated program transformation is a powerful primitive, and applying incorrect templates can produce malformed programs. When developing templates, it is helpful to impose validation criteria for running the analysis on the modified program. Analyses generally accept only well-formed programs (in the respective language), and typically rely on building artifacts or instrumenting compiler output to perform analysis. Language allowing, we impose a validation step that all modified programs must compile 5 when performing analysis, which provides additional assurance that the analysis will not terminate early due to malformed programs. For PHP, we rely on a valid parse of target files as the validation step. Applying transformations may violate style checkers (e.g., linters) integrated into a build manifest, or cause spurious compiler warnings (e.g., unused variables), but still allow the program to compile successfully. We allow such violations or warnings; in our results these do not directly affect the fidelity of the analysis with respect to the issue targeted by transformation. Another possibility of interference is that transformations addressing one bug class may lead to additional reports for a different bug class. This undesirable behavior depends on the analysis checks, its configuration, and template formulation. We qualify such cases in our experiments (Section 4).
+本稿の基本は偽陽性の抑制だが、追加されたバグを表面化させるようにも変換できるで（！）  
+小泉: additional bugs がどういうコンテキストでの言葉なのかwktk
 
-In the final step we capture analyzer output for the modified program 6 . The goal of our approach is that this output provides a higher quality bug report than that obtained from running the analyzer on the original program.
+The rewriter can be seen **as a preprocessor for analyses**. One principle of running our approach prelude to analysis is that we can dually use templates to search for and detect (but not necessarily rewrite) problematic syntactic patterns. **This mechanism provides an early smoke signal that may trip particular analyzers even before the analysis runs**. We notably reuse our templates to detect false positive-inducing patterns across projects in our evaluation. Large scale efforts can similarly detect the extent of possibly affected projects when adopting a new analyzer; **analysis writers may use it to prioritize analysis fixes**. These capabilities are notable in contrasting our approach to existing mechanisms: syntactic templates are valuable in explicitly codifying sensitivities of analysis behavior as it relates to program structure, whereas suppression-by-comments and configuration options provide an escape hatch in anticipation of problematic analysis interactions where program structure is readily ignored.
+
+調整テンプレの知見は、逆に誤検出を起こしそうなコードへ変換できるという意味でもある。この（逆）変換を利用して、解析器の開発者に誤検知箇所を提示し、修正の優先順位をつけることができる。
+
+**What are the conditions for analyzing a modified program?**  
+Automated program transformation is a powerful primitive, and **applying incorrect templates can produce malformed programs**. **When developing templates, it is helpful to impose validation criteria for running the analysis on the modified program.** Analyses generally accept only well-formed programs (in the respective language), and **typically rely on building artifacts or instrumenting compiler output to perform analysis**. Language allowing, we impose a validation step that all modified programs must compile 5 when performing analysis, which provides additional assurance that the analysis will not terminate early due to malformed programs. For PHP, we rely on a valid parse of target files as the validation step. Applying transformations may violate style checkers (e.g., linters) integrated into a build manifest, or cause spurious compiler warnings (e.g., unused variables), but still allow the program to compile successfully. We allow such violations or warnings; **in our results these do not directly affect the fidelity of the analysis with respect to the issue targeted by transformation. Another possibility of interference is that transformations addressing one bug class may lead to additional reports for a different bug class. This undesirable behavior depends on the analysis checks, its configuration, and template formulation. We qualify such cases in our experiments (Section 4).**
+
+不適切なテンプレートを適用すると、プログラムを壊す可能性がある。なので変更後のプログラムでの検証基準を設けておくと便利。検証することで、変換後のプログラムへの解析が早期終了しないことを保証される。ある変換が解析に悪影響を与える可能性の一つは、あるバグクラスの問題へ対処した結果、他のバグクラスのレポートを誘発する、みたいなシナリオ。実験でもこういったケースがある。
+
+In the final step we capture analyzer output for the modified program 6 . **The goal of our approach is that this output provides a higher quality bug report than that obtained from running the analyzer on the original program.**
+
+この手法の目的: 解析器のバグレポートがより高品質になること。
 
 ## 4 Evaluation
-This section describes our results tailoring programs for analysis. Our evaluation emphasizes real-world applicability on large and popular programs for modern analyzers. The goal of our evaluation is to show that programs can be tailored generically and declaratively to improve analysis output. We focus on breadth of applicability across languages and analyzers for real-world issues. Thus, our research questions are:
+This section describes our results tailoring programs for analysis. Our evaluation emphasizes real-world applicability on large and popular programs for modern analyzers. **The goal of our evaluation is to show that programs can be tailored generically and declaratively to improve analysis output.** We focus on breadth of applicability across languages and analyzers for real-world issues. Thus, our research questions are:
 
-- RQ. 1 Can tailoring programs improve the fidelity of static analysis reports? Specifically: Does the approach remove false positive reports without otherwise adversely affecting the analysis results?
-- RQ. 2 Does the program tailoring approach generalize? We specifically evaluate generality with respect to multiple languages and analyzers, and pattern reuse across projects.
+評価目標: プログラムを一般的かつ宣言的に調整し、解析結果を改善できることを示す
+
+- RQ. 1 Can tailoring programs improve the fidelity of static analysis reports? Specifically: **Does the approach remove false positive reports without otherwise adversely affecting the analysis results?**
+
+RQ1: FPを減らしつつ、悪影響が出ないようにできるか？
+
+- RQ. 2 Does the program tailoring approach generalize? **We specifically evaluate generality with respect to multiple languages and analyzers, and pattern reuse across projects.**
+
+RQ2: 複数の言語と解析器に関して一般できているか（パターンの再利用できるか）
 
 Section 4.1 describes our experimental setup. Section 4.2 describes our results applying 9 rewrite templates to 15 projects across five analyzers.
 
 ### 4.1 Experimental Setup
-We consider five popular analyzers: PHPStan [7] for PHP, SpotBugs [8] for Java, Clang Static Analyzer [1] and CodeSonar [2] for C, and Infer [5] for both Java and C. All analyzers are mature, actively used, and incorporate state-of-the-art techniques. All analyzers are open source, except for CodeSonar which is a commercial analyzer.(\*9) For each analyzer we were interested in current or long-standing issues that cause spurious warnings or false positives, and particularly issues that could not be easily addressed by analysis configuration or suppression mechanisms:
+We consider five popular analyzers: `PHPStan` [7] for PHP, `SpotBugs` [8] for Java, `Clang Static Analyzer` [1] and `CodeSonar` [2] for C, and `Infer` [5] for both Java and C. All analyzers are mature, actively used, and incorporate state-of-the-art techniques. **All analyzers are open source, except for CodeSonar which is a commercial analyzer**.(\*9) For each analyzer we were interested in current or long-standing issues that cause spurious warnings or false positives, and particularly issues that could not be easily addressed by analysis configuration or suppression mechanisms:
 
 (\*9) We used CodeSonar under a free academic license.
 
-- (1) We searched the PHPStan, SpotBugs, and Infer issue trackers on GitHub for reports or comments containing the words “false positive”.
-- (2) We found related issues for the Clang Static Analyzer (which does not have a GitHub issue tracker), by searching for GitHub commits containing the words “clang static analyzer false positive”.
-- (3) CodeSonar does not have a public issue tracker, nor did we find public commits referencing false positives. We manually inspected warnings for false positives.
+評価対象の5つの静的解析器について。以下問題点の抽出手順。
 
-The above methods influenced project selection. For (1) we identified problematic syntax patterns and user-affected projects from user reports. For (2) we identified committed code changes in an existing project and used this to develop a generic template. For (3) we selected popular C projects as representative real world projects (since we did not have sources indicating false positives in CodeSonar a priori).
+- (1) **We searched the PHPStan, SpotBugs, and Infer issue trackers on GitHub for reports or comments containing the words “false positive”.**
+- (2) **We found related issues for the Clang Static Analyzer (which does not have a GitHub issue tracker), by searching for GitHub commits containing the words “clang static analyzer false positive”.**
+- (3) CodeSonar does not have a public issue tracker, nor did we find public commits referencing false positives. **We manually inspected warnings for false positives.**
 
-Templates developed from the initial set of issues were reused to search for additional projects containing potentially false positiveinducing patterns. We searched over the top 100 most popular(\*10) projects for each language. However, to apply our approach generally, we require that a project (a) compiles (or parses) successfully and (b) is configured for analysis. Many of the projects identified by large-scale search presented significant manual burden to compile (e.g., due to various dependencies and platform-specific requirements like like Android, iOS, or Visual Studio) and consequently configure for analysis. We note that this burden is amplified for external users (such as ourselves) who have limited access to various platforms and who are unfamiliar with specific build configurations. We generally expect the burden to be less of an impediment for using our approach among project maintainers, who are familiar with the complexities of their own projects.
+GitHub で PHPStan, SpotBugs, Infer について issue tracker を検索（false positiveという文言で）。 GitHubのコミットで “clang static analyzer false positive” を検索。 CodeSonarについては手動で検査。
+
+The above methods influenced project selection. For (1) we identified problematic syntax patterns and user-affected projects from user reports. **For (2) we identified committed code changes in an existing project and used this to develop a generic template.** For (3) we selected popular C projects as representative real world projects (since we did not have sources indicating false positives in CodeSonar a priori).
+
+(2)については汎用テンプレートの参考にした。
+
+Templates developed from the initial set of issues were reused to search for additional projects containing potentially false positiveinducing patterns. **We searched over the top 100 most popular(\*10) projects for each language.** However, to apply our approach generally, **we require that a project (a) compiles (or parses) successfully and (b) is configured for analysis**. Many of the projects identified by large-scale search **presented significant manual burden to compile** (e.g., due to various dependencies and platform-specific requirements like like Android, iOS, or Visual Studio) and **consequently configure for analysis**. We note that this burden is amplified for external users (such as ourselves) who have limited access to various platforms and who are unfamiliar with specific build configurations. We generally expect the burden to be less of an impediment for using our approach among project maintainers, who are familiar with the complexities of their own projects.
 
 (\*10) Ranked by the number of user favorites (GitHub stars)
 
-In aggregate, we evaluate our approach on 15 projects. Our selection represents a convenience sample of real world issues to substantiate our claims about tailoring programs to overcome analyzer limitations. The selection includes real issues that affect developers of large, popular codebases. We show that our approach is efficient and scales to these concerns, and that it presents reuse potential across projects.
+上記で作ったテンプレートを用いて、人気プロジェクトからそのパターンを多く含むプロジェクトを検索。 ただし、それらのプロジェクトはそもそもコンパイルのコストが高い場合があるので、一部は解析用に合わせてコンパイルした。
 
-We ran our large-scale search experiments on an Ubuntu 16.04 LTS server, with 20 Xeon E5-2699 CPU cores and 20GB of RAM. We evaluated analysis improvement on this same hardware for large projects (>100KLOC) and the CodeSonar analyzer. All other analysis improvement experiments were run on an Ubuntu 16.04 VM with two 2.2 GHz i7 CPU cores and 4GB RAM. We make our tooling and data available online.(\*11)
+In aggregate, **we evaluate our approach on 15 projects**. Our selection represents a convenience sample of real world issues to substantiate our claims about tailoring programs to overcome analyzer limitations. The selection includes real issues that affect developers of large, popular codebases. We show that our approach is efficient and scales to these concerns, and that it presents reuse potential across projects.
+
+We ran our large-scale search experiments on an `Ubuntu 16.04 LTS server`, with `20 Xeon E5-2699 CPU cores` and `20GB of RAM`. We evaluated analysis improvement on this same hardware for large projects (>100KLOC) and the CodeSonar analyzer. All other analysis improvement experiments were run on an `Ubuntu 16.04 VM` with `two 2.2 GHz i7 CPU cores` and `4GB RAM`. We make our tooling and data available online.(\*11)
 
 (\*11) https://doi.org/10.5281/zenodo.3629098
 
 ### 4.2 Experimental Results
-4.2.1 Overview. Table 1 shows our results for each analyzer. We develop transformations for 9 syntactic Patterns across PHP, Java, and C projects. We discuss the patterns in detail in Section 4.2.5. The Issues column shows the total number of warnings across all bug classes in the Before column (each analyzer is run with its default checks). We ran each analyzer on the entire project (warnings are thus for the entire project) except for PHPStan where the number of warnings is reported for a single file. PHPStan can operate at the file level, and using targeted transformation we demonstrate that our approach can isolate issues in individual files without incurring a project-wide analysis. The Cls column is the subset of all bugs that fall into the bug Class that the pattern targets. The ∆ FP column is the number of false positives removed for that bug class by transformation. The #R column is the number of rewritten instances in the source code for each pattern. There may be more or fewer rewritten instances compared to removed false positives due to the effect of transformations on analyses (cf. pattern free-model and if-assign-resources); we elaborate in Section 4.2.5. The time to transform the program (Time Rewr) is negligible compared to analysis runtime (Time Anlyz). In aggregate these transformations remove 111 false positives (∆ FP), with a median of 2 per project.
+#### 4.2.1 Overview.
+Table 1 shows our results for each analyzer. We develop transformations for 9 syntactic Patterns across PHP, Java, and C projects. We discuss the patterns in detail in Section 4.2.5. The Issues column shows **the total number of warnings across all bug classes in the Before column** (each analyzer is run with its default checks). We ran each analyzer on the entire project (warnings are thus for the entire project) except for PHPStan where the number of warnings is reported for a single file. **PHPStan can operate at the file level, and using targeted transformation we demonstrate that our approach can isolate issues in individual files without incurring a project-wide analysis.** **The Cls column is the subset of all bugs that fall into the bug Class that the pattern targets.** **The ∆ FP column is the number of false positives removed for that bug class by transformation.** **The #R column is the number of rewritten instances in the source code for each pattern.** There may be more or fewer rewritten instances compared to removed false positives due to the effect of transformations on analyses (cf. pattern free-model and if-assign-resources); we elaborate in Section 4.2.5. The time to transform the program (Time Rewr) is negligible compared to analysis runtime (Time Anlyz). In aggregate these transformations **remove 111 false positives (∆ FP)**, with a median of 2 per project.
 
+Ref: 調整前の誤検出総数  
+CIs: バグパターンを含んでいるクラスの総数  
+∆FP: 削減された誤検出の数  
+\#R: 書き換えられたインスタンスの総数  
+書き換え時間（Rewr）は解析時間に比べるとわずか。合計111の誤検出の除去を達成。
 
 #### 4.2.2 Effects of transformations on analysis behavior.
-Providing a primitive for arbitrarily modifying programs means that our approach can hypothetically introduce adverse effects which do not exist in the original program. The negative possibilities are that a change either removes true positives in the original program, introduces more false positives in the modified program, or both. We evaluated whether our patterns cause such adverse effects by manually inspecting bug reports before and after applying a transformation for every analysis run. From our inspection, no true positives are removed for any project. No additional bug reports are introduced for any project, except OpenSSL and Presto. Infer nondeterministically reports different numbers of bugs for large Java projects in the case of Presto, irrespective of whether we perform a change. We confirmed that our change removes the false positive on five independent runs; nondeterminism for large numbers of bug reports (>800) make it difficult to conclude whether our change has any meaningful effect on other reports.
+Providing a primitive for arbitrarily modifying programs means that our approach can hypothetically introduce adverse effects which do not exist in the original program. **The negative possibilities are that a change either removes true positives in the original program, introduces more false positives in the modified program, or both.** We evaluated whether our patterns cause such adverse effects by **manually** inspecting bug reports before and after applying a transformation for every analysis run. **From our inspection, no true positives are removed for any project.** No additional bug reports are introduced for any project, **except OpenSSL and Presto**. Infer nondeterministically reports different numbers of bugs for large Java projects in the case of Presto, irrespective of whether we perform a change. We confirmed that our change removes the false positive on five independent runs; **nondeterminism for large numbers of bug reports (>800) make it difficult to conclude whether our change has any meaningful effect on other reports.**
 
-We observed that Infer reports an additional 6 potential null dereferences after applying the free-model pattern. This is interesting because the free-model pattern targets memory leak false positives, not null dereference reports. Interestingly, Infer analyzes and reports bugs in functions after transforming the program, whereas it previously short-circuits analysis and reporting for functions containing free-wrapper functions. We inspected these reports and could not obviously discern whether they were false positive or true positive reports.
+調整によって悪影響（真に陽性なバグを見逃すが、新しい誤検知を追加するか）が出るかを調査。手動で検査すると、前者はなし。後者はOpenSSLとPresto（いずれも解析器はInfer）で発見。 原因はInferの非決定的な報告（なので報告しない場合も存在）。 大規模なプロジェクトでの非決定的な要素は影響の予測を困難にする。
 
-In summary: Our approach removes false positives without adversely effecting the analysis in the majority of cases (13 out of 15 projects), while two projects are inconclusive. In general, program tailoring is effective because transformations perform small, local changes that affect only the reasoning of the analysis for that instance or bug class (as detailed in Section 4.2.5). It follows that changes which are closely semantics-preserving of the original program ought not make an analysis less precise, and our results affirm this intuition.
+We observed that Infer reports an additional 6 potential null dereferences after applying the free-model pattern. **This is interesting because the free-model pattern targets memory leak false positives, not null dereference reports.** Interestingly, Infer analyzes and reports bugs in functions after transforming the program, whereas it previously short-circuits analysis and reporting for functions containing free-wrapper functions. We inspected these reports and **could not obviously discern whether they were false positive or true positive reports**.
+
+Inferについては、Null への潜在的なデリファレンスが6件報告されたが、このときの検査パターンはfree-model、つまりメモリリークのFPを対象にしていた（どちらかというとNotNullのせいで誤検知となるはずなのに）。実際にこれがFPなのかFNなのかは判然とせず。
+
+In summary: **Our approach removes false positives without adversely effecting the analysis in the majority of cases (13 out of 15 projects), while two projects are inconclusive**. In general, program tailoring is effective because transformations perform small, local changes that affect only the reasoning of the analysis for that instance or bug class (as detailed in Section 4.2.5). It follows that changes which are closely semantics-preserving of the original program ought not make an analysis less precise, and our results affirm this intuition.
+
+13/15のプロジェクトで悪影響はなく精度を改善した。が、2/15では決定的ではなかった。
 
 #### 4.2.3 Amortizing human effort for codifying and detecting patterns.
-Pattern reuse is an especially appealing property of tailoring programs. We developed four patterns from user-reported issues in an initial project(\*12) which we then used to detect and fix multiple false positive issues in six additional independent projects. These results show that patterns may generalize to benefit multiple projects, and imply that the cost and human effort of writing broadly applicable templates can be amortized across software stakeholders (i.e., both analysis users and analysis writers develop, distribute, and benefit from patterns). In contrast, existing mechanisms using comment suppression or command line options cannot likewise generalize, and consequently induce recurring developer effort.
+Pattern reuse is an especially appealing property of tailoring programs. We developed four patterns from user-reported issues in an initial project(\*12) which we then used to detect and fix multiple false positive issues in six additional independent projects. These results show that **patterns may generalize to benefit multiple projects, and imply that the cost and human effort of writing broadly applicable templates can be amortized across software stakeholders** (i.e., both analysis users and analysis writers develop, distribute, and benefit from patterns). In contrast, **existing mechanisms using comment suppression or command line options cannot likewise generalize, and consequently induce recurring developer effort**.
 
 (\*12) if-assign-resources, substr-model, create-socket, and null-on-resources
 
-We performed a large-scale search using each pattern to identify the additional projects above, and to quantify overall efficiency.(\*13) Table 2 shows our results running each pattern on the top 100 most popular GitHub repositories for PHP, Java, and C. In general search is fast and can identify potential false-positive inducing patterns before an analysis even runs.
+パターンの再利用（テンプレート化）によって、複数のプロジェクトでテンプレを用いることでコストの償却が期待できる。一方で、コメントの抑制やコマンドラインオプションを使う既存メカニズムは一般化を達成できなかった（開発者のコストは変わらず）
+
+We performed a large-scale search using each pattern to identify the additional projects above, and to quantify overall efficiency.(\*13) Table 2 shows our results running each pattern on the top 100 most popular GitHub repositories for PHP, Java, and C. **In general search is fast and can identify potential false-positive inducing patterns before an analysis even runs.**
 
 (\*13) Note that the patterns identified projects which failed to run under the analysis or compile, and hence are not included in our final Table 1.
 
+表1での実験で使ったパターンを用いて、GitHub上でパターンマッチする件数を調査(表2)。解析のFPを導くようなパターンが結構ある＝パターンの再利用が十分可能である。
+
 #### 4.2.4 Issue duration and resolution for analysis end users.
-Table 3 characterizes six open source issues that our patterns address.(\*14) Interestingly, issues are long-standing (unresolved for over a year, on average), and all but one remain unresolved at the time of writing. These issues generally reveal that analysis end users are subject to long delays and lack of support, having little recourse for resolving false positives using existing mechanisms. On the one hand, analysis writers may not have the time to support user- or project-specific needs, and may deprioritize less pressing requests (e.g., infer/781 is an individual user request with no cross-references to other issues). On the other hand, an issue may affect many users (as shown by multiple cross-referenced issues for phpstan/647, spotbugs/756), but very complex to solve for analysis maintainers.
+Table 3 characterizes six open source issues that our patterns address.(\*14) Interestingly, issues are long-standing (unresolved for over a year, on average), and all but one remain unresolved at the time of writing. **These issues generally reveal that analysis end users are subject to long delays and lack of support, having little recourse for resolving false positives using existing mechanisms.** On the one hand, **analysis writers may not have the time to support user- or project-specific needs, and may deprioritize less pressing requests** (e.g., infer/781 is an individual user request with no cross-references to other issues). On the other hand, an issue may affect many users (as shown by multiple cross-referenced issues for phpstan/647, spotbugs/756), but very complex to solve for analysis maintainers.
 
 (\*14) The three remaining patterns, rsyslog, and those for CodeSonar, do not have open source issues.
 
-Our approach handles these issues via program transformation, and give agency to end users for implementing workarounds. Furthermore, user-reported errors can be significantly more severe than other analysis reports as they may break existing software workflows. For example, even a single false positive report in SpotBugs due to null-on-resources breaks the continuous integration (CI) build of cross-referenced projects, and caused users to disable the check wholesale for their projects across all versions of Java. Because of this profound effect, bug severity and build integration must be weighed into analysis configuration mechanisms. Moreover, although the relative size of false positive reduction is small for some reports in Table 1, the correspondence to real-world issues and extended impact on end users and software workflows make the false positives we handle more significant than others. Our results show that our approach can uniquely address such complexities.
+表3: 作ったパターンに対応するOSSのIssueの特徴。問題の多くは平均1年以上未解決のままで、phpstan/647を除いて未だに未解決。 エンドユーザはサポートを受けられずにいる状態が続いている。一方、開発者視点だと、緊急でもない限り、個々のユーザに対応する優先度が低い現状がある。
+
+Our approach handles these issues via program transformation, and give agency to end users for implementing workarounds. Furthermore, user-reported errors can be significantly more severe than other analysis reports as they may break existing software workflows. For example, even a single false positive report in SpotBugs due to null-on-resources breaks the continuous integration (CI) build of cross-referenced projects, and caused users to disable the check wholesale for their projects across all versions of Java. **Because of this profound effect, bug severity and build integration must be weighed into analysis configuration mechanisms. Moreover, although the relative size of false positive reduction is small for some reports in Table 1, the correspondence to real-world issues and extended impact on end users and software workflows make the false positives we handle more significant than others.** Our results show that our approach can uniquely address such complexities.
+
+ユーザが提供するエラーは既存のソフトウェアワークフローを破壊する可能性がある。テンプレートを用いた変換は相対的にサイズが小さいが、大きな影響を持つ。
 
 #### 4.2.5 Rewrite patterns.
 We now discuss analyzer issues in greater detail, explain what our template transformation does to resolve the issue, and why it induces a positive change in analysis behavior. There is generally a one-to-one correspondence of template to pattern. The exception is patterns if-assign-resources and null-on-resources where we implemented two templates to account for syntactic variants in function call names and optional catch blocks.
