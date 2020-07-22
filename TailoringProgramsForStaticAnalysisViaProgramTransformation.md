@@ -296,15 +296,71 @@ Our approach handles these issues via program transformation, and give agency to
 ユーザが提供するエラーは既存のソフトウェアワークフローを破壊する可能性がある。テンプレートを用いた変換は相対的にサイズが小さいが、大きな影響を持つ。
 
 #### 4.2.5 Rewrite patterns.
-We now discuss analyzer issues in greater detail, explain what our template transformation does to resolve the issue, and why it induces a positive change in analysis behavior. There is generally a one-to-one correspondence of template to pattern. The exception is patterns if-assign-resources and null-on-resources where we implemented two templates to account for syntactic variants in function call names and optional catch blocks.
+We now discuss analyzer issues in greater detail, explain what our template transformation does to resolve the issue, and why it induces a positive change in analysis behavior. There is generally a **one-to-one correspondence of template to pattern**. The **exception is patterns if-assign-resources and null-on-resources** where we implemented two templates to account for syntactic variants in function call names and optional catch blocks.
 
-Pattern: if-assign-resources. This pattern addresses the issue of variable assignment in if-conditionals (as introduced in Section 2). At the original time of writing PHPStan did not accurately track the effects of such assignments, and it took over a year to fix in the analysis implementation. False positives particularly manifest for cases where states of resources (like files) are opened. Because PHPStan does not track that the variable assigned cannot be false, it reports an error when the variable is passed to a function such as fwrite or fclose, saying “Parameter #1 of function fclose expects resource, resource|false given”. The transformation pulls the assignment out of the if-condition, which allows PHPStan to accurately track the effect (Fig. 4). An interesting result is that rewriting this pattern can remove many false positive reports because multiple functions may use a file resource along multiple paths, and each use raises an error. For example, rewriting 16 cases in WordPress removes 44 false positives.
+各パターンについて掘り下げ。基本1パターン1テンプレートだが、if-assign-resourcesとnull-on-resourcesは例外的に2つのテンプレートを実装。
 
-Pattern: substr-model. The substr function in PHP performs a substring operation. PHPStan models return value types of functions like substr. However, PHPStan did not track the fact that substr may return false if the length of the string is shorter than the requested substring range. PHPStan, thinking the value can only ever be a string, thus emits a false positive when a user’s code checks whether the return value of substr is false, saying “comparison using === between string and false will always evaluate to false”.
+**Pattern: `if-assign-resources`.**  
+This pattern addresses the issue of variable assignment in if-conditionals (as introduced in Section 2). At the original time of writing PHPStan did not accurately track the effects of such assignments, and it took over a year to fix in the analysis implementation. False positives particularly manifest for cases where states of resources (like files) are opened. Because PHPStan does not track that the variable assigned cannot be `false`, it reports an error when the variable is passed to a function such as `fwrite` or `fclose`, saying “Parameter `#1` of function `fclose` expects resource, resource|`false` given”. The transformation pulls the assignment out of the `if-condition`, which allows PHPStan to accurately track the effect (Fig. 4). An interesting result is that rewriting this pattern can remove many false positive reports because multiple functions may use a file resource along multiple paths, and each use raises an error. For example, rewriting 16 cases in WordPress removes 44 false positives.
 
-It took eight months as of the first user report for maintainers to implement the solution properly. It is particularly interesting that the maintainers were unwilling to make a simple change to the function model to reflect that substr can return false, because it would propagate spurious warnings when used as an argument in other contexts. However, users primarily had issues with the model when they checked return values, not when the value was used as an argument. Our transformation in Fig. 5 matches problematic cases that users experienced while avoiding the difficulty of changing the substr model wholesale. We introduce the expression isset($maybe_false) which lets PHPStan reason that the return value of an unset variable may be false. Statements that assign the result of substr before an if check are changed with an or-clause, which effectively remodels the substr call to possibly return a false value. Note that the use of :[[v]] in the assignment statement (line 1) and conditional expression (line 2) of the match template introduce a constraint that both matching instances must be syntactically equal for the rewrite rule to fire. This pattern removes six false positive reports in four PHP projects.
+```php
+if ((:[v] = @fopen (:[a]) ) == 0)
+```
+Match Template
 
-Pattern: free-model. Infer may timeout when analyzing functions and fail to summarize their effect. Infer reports false positive memory leaks when it fails to realize that a function frees memory— this happens particularly when the C library free call is wrapped inside custom free functions. The OpenSSL project follows the convention of wrapping free calls in functions like OPENSSL_free, which Infer fails to analyze. As an approximation of these custom free functions, our transformation (Fig. 6) rewrites the wrapping functions to call the plain C library free version. Due to syntactic ambiguity, the pattern may match and rewrite function declarations as well. We found that prepending a semicolon can sufficiently disambiguate candidate free statements from function declarations. OpenSSL compiles successfully despite transforming more than three thousand calls, and removes 6 false positives because Infer can then track the effect of free on memory for rewritten calls.
+```php
+:[v] = @fopen (:[a]) ;
+if (:[v] === false )
+```
+Match Template
+
+Motivでも出てきた、条件分内に代入の副作用があるパターン（特にリソースが代入されることを想定）。PHPStanでは変数がfalseになりえないことを追跡できず誤検出を生む。多くの誤検出を削除できる例。
+
+**Pattern: substr-model.**  
+The `substr` function in PHP performs a substring operation. PHPStan models return value types of functions like `substr`. However, PHPStan did not track the fact that `substr` may return `false` if the length of the string is shorter than the requested substring range. PHPStan, thinking the value can only ever be a string, thus emits a false positive when a user’s code checks whether the return value of `substr` is `false`, saying “comparison using `===` between string and `false` will always evaluate to `false`”.
+
+PHPのsubstr関数は部分文字列操作だが、falseを返す場合がある（変数の値が文字列とfalseになりえる）。ユーザがコード内でfalseチェックをすると、===を文字列とfalseで比較してるのでfalseになるぞ、と誤検出する。
+
+It took eight months as of the first user report for maintainers to implement the solution properly. **It is particularly interesting that the maintainers were unwilling to make a simple change to the function model to reflect that `substr` can return `false`**, because it would propagate spurious warnings when used as an argument in other contexts. However, users primarily had issues with the model when they checked return values, not when the value was used as an argument. Our transformation in Fig. 5 matches problematic cases that users experienced while avoiding the difficulty of changing the `substr` model wholesale. We introduce the expression `isset($maybe_false)` which lets PHPStan reason that the return value of an unset variable may be `false`. Statements that assign the result of `substr` before an if check are changed with an or-clause, which effectively remodels the `substr` call to possibly return a `false` value. Note that the use of `:[[v]]` in the assignment statement (line 1) and conditional expression (line 2) of the match template introduce a constraint that both matching instances must be syntactically equal for the rewrite rule to fire. This pattern removes six false positive reports in four PHP projects.
+
+```php
+$:[[v]] = substr (:[a]) ;
+if ($:[[v]] === false )
+```
+Match Template
+
+```php
+$:[[v]] = substr (:[a]) || isset ( $maybe_false ) ;
+if ($:[[v]] === false )
+```
+Match Template
+
+解析器の管理者がこれを修正するまでに8か月を要した（警告がカスケードするのに、この簡単な修正を中々しなかったのは興味深い）。テンプレートとしては、issetを導入することでPHPStanでも正確になるようにした。ただし、テンプレ内の:[[v]]が2行に渡って一致しないといけないという制約が生じた。
+
+**Pattern: free-model.**  
+Infer may timeout when analyzing functions and fail to summarize their effect. **Infer reports false positive memory leaks when it fails to realize that a function frees memory— this happens particularly when the C library `free` call is wrapped inside custom free functions.** The OpenSSL project follows the convention of wrapping `free` calls in functions like `OPENSSL_free`, which Infer fails to analyze. As an approximation of these custom `free` functions, our transformation (Fig. 6) rewrites the wrapping functions to call the plain C library `free` version. Due to syntactic ambiguity, the pattern may match and rewrite function declarations as well. We found that prepending a semicolon can sufficiently disambiguate candidate `free` statements from function declarations. OpenSSL compiles successfully despite transforming more than three thousand calls, and removes 6 false positives because Infer can then track the effect of `free` on memory for rewritten calls.
+
+```c
+:[[f]](:[args])
+_______________________
+where match :[args] {
+| ":[_] ,:[_]" -> false
+| ":[_]" -> true
+}
+```
+Match Template (引数が一つならおｋ)
+
+```c
+:[[f]](:[args])
+_______________________
+where rewrite :[f] {
+":[_] free :[_]" -> " free "
+}
+```
+Match Template (freeの前後に何か文字列がくっついてれば、通常のfreeにする)
+
+Inferはメモリの解放を見逃すと、メモリリークを誤検知する。特にfree関数のラッパーについて起きやすい。変換ルールとしては、ラッパーを普通のfree関数へ置換する（unwrap）。ただし、この置換についてはラッパー関数が"XXX_free"であることと、引数が一つ(freeと同じ)である必要がある。OpenSSLでは、この変換でも正常にコンパイルでき、6つの誤検出を抑制。  
+小泉: 結構ガバガバな気もするが…。まあ静的解析で解析できるようにunwrapしてると考えればまあ。
 
 Pattern: create-socket. The createSocket(socket, ..) call is typically used in conjunction with the Java SSL library. It returns a server socket that wraps an existing socket in the first argument. The last argument, when true, tells the call that the underlying socket should be closed when the returned socket is closed. Infer fails to model the createSocket call, and a false positive report states that the underlying socket is leaked. The boolean toggle in the last argument makes this function difficult to model generically.
 
