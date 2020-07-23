@@ -312,11 +312,11 @@ Match Template
 :[v] = @fopen (:[a]) ;
 if (:[v] === false )
 ```
-Match Template
+Rewrite Template
 
 Motivでも出てきた、条件分内に代入の副作用があるパターン（特にリソースが代入されることを想定）。PHPStanでは変数がfalseになりえないことを追跡できず誤検出を生む。多くの誤検出を削除できる例。
 
-**Pattern: substr-model.**  
+**Pattern: `substr-model`.**  
 The `substr` function in PHP performs a substring operation. PHPStan models return value types of functions like `substr`. However, PHPStan did not track the fact that `substr` may return `false` if the length of the string is shorter than the requested substring range. PHPStan, thinking the value can only ever be a string, thus emits a false positive when a user’s code checks whether the return value of `substr` is `false`, saying “comparison using `===` between string and `false` will always evaluate to `false`”.
 
 PHPのsubstr関数は部分文字列操作だが、falseを返す場合がある（変数の値が文字列とfalseになりえる）。ユーザがコード内でfalseチェックをすると、===を文字列とfalseで比較してるのでfalseになるぞ、と誤検出する。
@@ -333,11 +333,11 @@ Match Template
 $:[[v]] = substr (:[a]) || isset ( $maybe_false ) ;
 if ($:[[v]] === false )
 ```
-Match Template
+Rewrite Template
 
 解析器の管理者がこれを修正するまでに8か月を要した（警告がカスケードするのに、この簡単な修正を中々しなかったのは興味深い）。テンプレートとしては、issetを導入することでPHPStanでも正確になるようにした。ただし、テンプレ内の:[[v]]が2行に渡って一致しないといけないという制約が生じた。
 
-**Pattern: free-model.**  
+**Pattern: `free-model`.**  
 Infer may timeout when analyzing functions and fail to summarize their effect. **Infer reports false positive memory leaks when it fails to realize that a function frees memory— this happens particularly when the C library `free` call is wrapped inside custom free functions.** The OpenSSL project follows the convention of wrapping `free` calls in functions like `OPENSSL_free`, which Infer fails to analyze. As an approximation of these custom `free` functions, our transformation (Fig. 6) rewrites the wrapping functions to call the plain C library `free` version. Due to syntactic ambiguity, the pattern may match and rewrite function declarations as well. We found that prepending a semicolon can sufficiently disambiguate candidate `free` statements from function declarations. OpenSSL compiles successfully despite transforming more than three thousand calls, and removes 6 false positives because Infer can then track the effect of `free` on memory for rewritten calls.
 
 ```c
@@ -357,47 +357,183 @@ where rewrite :[f] {
 ":[_] free :[_]" -> " free "
 }
 ```
-Match Template (freeの前後に何か文字列がくっついてれば、通常のfreeにする)
+Rewrite Template (freeの前後に何か文字列がくっついてれば、通常のfreeにする)
 
 Inferはメモリの解放を見逃すと、メモリリークを誤検知する。特にfree関数のラッパーについて起きやすい。変換ルールとしては、ラッパーを普通のfree関数へ置換する（unwrap）。ただし、この置換についてはラッパー関数が"XXX_free"であることと、引数が一つ(freeと同じ)である必要がある。OpenSSLでは、この変換でも正常にコンパイルでき、6つの誤検出を抑制。  
 小泉: 結構ガバガバな気もするが…。まあ静的解析で解析できるようにunwrapしてると考えればまあ。
 
-Pattern: create-socket. The createSocket(socket, ..) call is typically used in conjunction with the Java SSL library. It returns a server socket that wraps an existing socket in the first argument. The last argument, when true, tells the call that the underlying socket should be closed when the returned socket is closed. Infer fails to model the createSocket call, and a false positive report states that the underlying socket is leaked. The boolean toggle in the last argument makes this function difficult to model generically.
+**Pattern: `create-socket`.**  
+The `createSocket(socket, ..)` call is typically used in conjunction with the Java SSL library. It returns a server socket that wraps an existing socket in the first argument. The last argument, when `true`, tells the call that the underlying socket should be closed when the returned socket is closed. **Infer fails to model the `createSocket` call, and a false positive report states that the underlying socket is leaked.** The boolean toggle in the last argument makes this function difficult to model generically.
 
-Interestingly, a user reports a false positive for a particular case where the last argument is always true. Our transformation (Fig. 7) addresses the issue by simulating the close operation early, and simply returning a fresh socket for Infer to track. Note that we would never persist this change in practice as it loses the implementation details of createSocket; however, it is sufficient for making the analysis more precise. This pattern removes two false positive reports in two Java projects; no resolution has yet been proposed in the Infer issue tracker.
+InferはcreateSocket関数のモデリングに失敗している。本来解放済みのソケットをリークとして報告してしまう。
 
-Pattern: wrapped-resources. Java 7 introduced the try-with resources statement which automatically closes a resource after the block executes, preventing a leak. Infer reports a false positive leak when a resource constructor is nested inside another resource constructor within a try-with-resources statement (this happens, e.g., when passing a FileInputStream to an InputStreamReader). The underlying problem is similar to pattern create-socket: Infer fails to track that the wrapped resource will be closed. We use a conceptually similar transformation as in create-socket, but account for the syntactic variation introduced by try-with blocks (Fig. 8).
+Interestingly, a user reports a false positive for a particular case where the last argument is always `true`. **Our transformation (Fig. 7) addresses the issue by simulating the `close` operation early, and simply returning a fresh socket for Infer to track.** Note that we would never persist this change in practice as it loses the implementation details of `createSocket`; however, it is sufficient for making the analysis more precise. This pattern removes two false positive reports in two Java projects; no resolution has yet been proposed in the Infer issue tracker.
 
-Pattern: null-on-resources. SpotBugs reports a redundant null check on resources inside try-with-resources statements (i.e., a resource is null checked after being previously dereferenced).(\*15) However, the error is only reported for code compiled with Java 11 and 12, and not Java 10. The reason is pernicious: the Java compiler in later versions inserts a null check in the bytecode which does appear to be indeed redundant. From the user’s perspective, however, the report is a false positive—no null check is visible in the source code. The issue is cross-referenced by a large number of projects, and remains unresolved for over a year. Various projects have added annotations or disabled the check completely. No official solution has been proposed. The transformation in Fig. 9 converts a trywith-resources statement to a traditional try-catch-finally block. In effect, we normalize the try-with-resources syntax across Java versions to sidestep the null-check generation that only happens for Java versions 11 and 12. This suppresses three spurious bug reports in two of the projects.
+```java
+:[[sock]] = :[_].createSocket (:[sock], :[_], :[_], true ) ;
+```
+Matching Template
+
+```java
+:[[sock]].close() ;
+:[[sock]] = new Socket() ;
+```
+Rewrite Template
+
+誤検知が発生するのが最後の引数がtrueの場合に起きる。結局はcloseしてSocketインスタンスを生成するやり方に切り替え。
+
+**Pattern: `wrapped-resources`.**  
+Java 7 introduced the `try-with-resources` statement which automatically closes a resource after the block executes, preventing a leak. Infer reports a false positive leak when a resource constructor is nested inside another resource constructor within a `try-with-resources` statement (this happens, e.g., when passing a `FileInputStream` to an `InputStreamReader`). The underlying problem is similar to pattern `create-socket`: Infer fails to track that the wrapped resource will be closed. We use a conceptually similar transformation as in `create-socket`, but account for the syntactic variation introduced by `try-with` blocks (Fig. 8).
+
+```java
+try (:[[o]] :[[v]] = new :[[c1]](new :[[c2]](:[args]) ) )
+```
+Matching Template
+
+```java
+:[c2] wrapped = new :[c2](:[args]);
+try {
+  wrapped.close () ;
+} catch ( IOException e ) {}
+  try (:[o] :[v] = new :[c1]( wrapped ) )
+```
+Rewrite Template
+<!-- ** ``  -->
+
+Infer が Java 7 の try-with-resources 構文に対応できない（ブロックを抜けると自動でリソースを解消する動きを追跡できない）。
+
+**Pattern: `null-on-resources`.**  
+SpotBugs reports a redundant `null` check on resources inside `try-with-resources` statements (i.e., a resource is `null` checked after being previously dereferenced).(\*15) However, the error is only reported for code compiled with Java 11 and 12, and not Java 10. **The reason is pernicious: the Java compiler in later versions inserts a `null` check in the bytecode which does appear to be indeed redundant.** From the user’s perspective, however, the report is a false positive—no `null` check is visible in the source code. The issue is cross-referenced by a large number of projects, and remains unresolved for over a year. Various projects have added annotations or disabled the check completely. No official solution has been proposed. The transformation in Fig. 9 converts a `try-with-resources` statement to a traditional `try-catch-finally` block. In effect, we normalize the `try-with-resources` syntax across Java versions to sidestep the null-check generation that only happens for Java versions 11 and 12. This suppresses three spurious bug reports in two of the projects.
 
 (\*15) Note this bug is orthogonal to wrapped-resources.
 
-Pattern: const-strcmp. The Clang Static Analyzer may report a potential out-of-bounds access when comparing strings with strcmp. This only happens when macro-expansion (defined in glibc headers) is triggered, in this case by the fact that a string literal is passed in the second argument to strcmp. The transformation in Fig. 10 extracts the string literal in the comparison to a string const, causing the analyzer to analyze the strcmp C library function rather than the macro expansion.
+```java
+try (:[x] :[[v]] = :[expr]) {
+  :[body]
+}:[rest]
+_______________________
+where match :[rest] with
+| " catch " -> false
+| " finally " -> false
+| ":[_]" -> true
+```
+Matching Template
 
-Pattern: strncpy-null The C strncpy function does not necessarily null-terminate its destination buffer, which can lead to memory corruption. CodeSonar warns about this possibility, but also notes that if a subsequent statement definitely null-terminates the string, then the warning can be ignored. We found that the warning was indeed a false positive in the swoole project: a subsequent check always null-terminates the buffer safely. However, a possible reason why CodeSonar conservatively reported an error is that the subsequent statement is guarded and was not considered safe (see line 10, Fig. 12). To avoid the false positive, our pattern checks whether a condition on the strncpy buffer length terminates that same buffer with a null character (Fig. 11). If so, the rewrite unconditionally null terminates the buffer. Although this transformation is not generally strong enough to match syntax that guarantees a null-terminated buffer, it does provide flexibility for refining analysis warnings. For example, we found exactly the same pattern using our template in the PHP source code, where it appears the php_ssl_cipher... function was borrowed from.
+```java
+:[x] :[v] = :[expr];
+try {
+  :[body]
+} finally {
+  if (:[v] != null ) {
+    :[v]. close () ;
+  }
+}
+:[rest]
+```
+Rewrite Template
 
-Pattern: snprintf-null CodeSonar reports an “Unterminated C String” error when a possibly unterminated string is passed to a function such as strcat. The analysis believes a string may not be null-terminated when, for example, space is allocated in the heap but not subsequently null-terminated. We identified two false positives where heap-allocated memory for a string is null-terminated, but only because we know that the buffer starts out with positive length and passes through snprintf which always null-terminates. The analysis introduces imprecision where it believes the string can be of zero length, but does not, however, then model the possibility that the buffer can subsequently be treated as a null pointer when passed to snprintf. Our transformation (Fig. 13) makes this possibility explicit and adds explicit null-termination, which suppresses two unterminated string warnings.
+SpotBugs Java 10, 11 でデリファレンス後のリソースへの冗長なnullチェックを実施。原因は根が深くて、Javaコンパイラがnullチェックを勝手に挿入することが原因（なのでソースコードとにらめっこしても分からない）。これも一年以上放置されている。テンプレートとしては、従来のtry-catch-finally構文へ変換を行う。
+
+**Pattern: `const-strcmp`.**  
+The Clang Static Analyzer may report a potential out-of-bounds access when comparing strings with `strcmp`. This only happens when macro-expansion (defined in glibc headers) is triggered, in this case by the fact that a string literal is passed in the second argument to `strcmp`. The transformation in Fig. 10 extracts the string literal in the comparison to a string `const`, causing the analyzer to analyze the `strcmp` C library function rather than the macro expansion.
+
+```c
+if( strcmp (:[1],":[2]") )
+```
+Matching Template
+
+```c
+const char * const t1 = ":[2]";
+if( strcmp (:[1],t1) )
+```
+Rewrite Template
+
+Clang Static Analyzer はstrcmpのマクロ展開（引数にリテラルが入った場合）が生じた場合、範囲外アクセスを誤検知する可能性がある。なのでconstの変数への代入を挟んで対処。
+
+**Pattern: `strncpy-null`**  
+The C `strncpy` function does not necessarily `null-terminated` its destination buffer, which can lead to memory corruption. CodeSonar warns about this possibility, but also notes that if a subsequent statement definitely `null-terminates` the string, then the warning can be ignored. We found that the warning was indeed a false positive in the swoole project: a subsequent check always `null-terminates` the buffer safely. However, a possible reason why CodeSonar conservatively reported an error is that the subsequent statement is guarded and was not considered safe (see line 10, Fig. 12). To avoid the false positive, our pattern checks whether a condition on the `strncpy` buffer length terminates that same buffer with a `null` character (Fig. 11). If so, the rewrite unconditionally `null-terminates` the buffer. Although this transformation is not generally strong enough to match syntax that guarantees a `null-terminated` buffer, it does provide flexibility for refining analysis warnings. For example, we found exactly the same pattern using our template in the PHP source code, where it appears the `php_ssl_cipher...` function was borrowed from.
+
+```c
+strncpy (:[dst], :[src], :[len]) ;
+if (:[len] :[rest]) { :[dst][:[idx]]] = 0; }
+```
+Matching Template
+
+```c
+strncpy (:[dst], :[src], :[len] - 1) ;
+:[dst][:[len] - 1] = '\0 ';
+if (:[len] :[rest]) { :[dst][:[idx]] = 0; }
+```
+Rewrite Template
+
+CodeSonar の誤検知例。 strncpy は書き込み先バッファをヌル文字で終わらせることを保証しないことへの警告を出す。本来後続の文でヌル文字が保証されていれば警告を出さないが、後続文がガードされると保守的に警告を出す（まあ冗長）。 なので書き換え後にヌル文字終端かどうかのチェックを入れている。
+
+**Pattern: `snprintf-null`**  
+CodeSonar reports an “Unterminated C String” error when a possibly unterminated string is passed to a function such as `strcat`. The analysis believes a string may not be `null-terminated` when, for example, space is allocated in the heap but not subsequently `null-terminated`. We identified two false positives where heap-allocated memory for a string is `null-terminated`, but only because we know that the buffer starts out with positive length and passes through `snprintf` which always `null-terminates`. The analysis introduces imprecision where it believes the string can be of zero length, but does not, however, then model the possibility that the buffer can subsequently be treated as a null pointer when passed to `snprintf`. Our transformation (Fig. 13) makes this possibility explicit and adds explicit `null-termination`, which suppresses two unterminated string warnings.
+
+```c
+snprintf (:[dst], :[len], :[rest]);
+```
+Matching Template
+
+```c
+snprintf (:[dst], :[len], :[rest]);
+if (:[len] > 0) {
+  :[dst][:[len]] = '\0 ';
+} else {
+  :[dst] = NULL ;
+}
+```
+Rewrite Template
+
+ヒープの文字列でヌル文字を入れていない場合などで、未終端の文字列として扱われる（エラー報告される）。 CodeSonarはsnprintfのモデリングが不完全なので、変換後は明示的にヌル文字を入れるようにした。
 
 #### 4.2.6 Discussion.
 We further characterize considerations and limitations of our approach.
 
-Pattern development. We found that developing patterns can take a few iterations to refine until they precisely match syntax of interest. For example, we iteratively added constraints in the null-on-resources pattern to filter out try statements that already contained catch and finally statements (without this constraint we would generate malformed programs). We expect users of our approach to similarly develop patterns incrementally. While there exists a learning curve for developing patterns, the process is analogous to existing practice at Google where analysis writers tune checks based on results of running over the codebase [31].
+**Pattern development.**  
+**We found that developing patterns can take a few iterations to refine until they precisely match syntax of interest.** For example, we iteratively added constraints in the null-on-resources pattern to filter out try statements that already contained catch and finally statements (without this constraint we would generate malformed programs). We expect users of our approach to similarly develop patterns incrementally. While there exists a learning curve for developing patterns, the process is analogous to existing practice at Google where analysis writers tune checks based on results of running over the codebase [31].
 
-Tailoring applicability and usability. Analyzers on GitHub have numerous open issues related to “false positive” reports (at the time of writing, Infer has 36 open issues and PHPStan has 32, and SpotBugs has 38), and our approach can fall outside the scope of these. For example, we may need type information to check whether a method or object may cause a false positive, while our approach is purely syntactic. As a practical matter, implementing an effective tailoring approach requires a robust and maintainable process for changing programs. We used comby to perform language-specific parsing and guarantee well-formedness with respect to certain syntactic properties (e.g., balanced parentheses). However, syntactic ambiguity in the target language can reduce the precision of purely syntactic transformations. Integrating static properties, like types, can achieve greater robustness and expressivity in transformations. We envision that leveraging existing rewrite tooling (e.g., Refaster [35] for Java) for program tailoring can further achieve robust transformations for very language-specific properties.
+パターン開発には何回かの反復（調整）が必要。なので、パターンを作る場合には、漸進的にすすめるのがベネ。
 
-We note the compelling case for applying our technique in “black box” analysis settings. Users of commercial analyzers, like CodeSonar, do not have agency over the closed-source implementation or configuration options outside those provided by the distributor. Our approach demonstrates a new way to fine-tune results that is complementary to a black box analysis.
+**Tailoring applicability and usability.**  
+**Analyzers on GitHub have numerous open issues** related to “false positive” reports (at the time of writing, Infer has 36 open issues and PHPStan has 32, and SpotBugs has 38), and **our approach can fall outside the scope of these**. For example, **we may need type information to check whether a method or object may cause a false positive, while our approach is purely syntactic**. As a practical matter, **implementing an effective tailoring approach requires a robust and maintainable process for changing programs**. We used comby to perform language-specific parsing and guarantee well-formedness with respect to certain syntactic properties (e.g., balanced parentheses). However, **syntactic ambiguity in the target language can reduce the precision of purely syntactic transformations**. **Integrating static properties, like types, can achieve greater robustness and expressivity in transformations.** We envision that leveraging existing rewrite tooling (e.g., **Refaster [35]** for Java) for program tailoring can further achieve robust transformations for very language-specific properties.
 
-True positive warnings in the modified program may appear at different lines compared to the original program. As a usability concern, affected lines in the modified program should map to those in the original. This is primarily an engineering concern, as transformations keep track of precise changes in offsets so that no information is lost.
+解析器のいくつかの誤検知問題については、対応しきれない部分がある。また、パターンマッチにはどうしても構造的な処理しかできないので、型情報などが必要なパターンには対応できない（他の技術、例えばRefaster[35]などと補完的に動作させることは可能）。言語のあいまいさも構文の弱点になりえる。
 
+We note the compelling case for applying our technique in “black box” analysis settings. Users of commercial analyzers, like CodeSonar, do not have agency over the closed-source implementation or configuration options outside those provided by the distributor. **Our approach demonstrates a new way to fine-tune results that is complementary to a black box analysis.**
+
+あくまでも解析器の内部はブラックボックスとして扱っている（テンプレートを作るのもパターンを見つけているだけで、内部処理はブラックボックス扱い）。
+
+**True positive warnings in the modified program may appear at different lines compared to the original program.** As a usability concern, affected lines in the modified program should map to those in the original. This is primarily an engineering concern, as **transformations keep track of precise changes in offsets so that no information is lost**.
+
+変換によって行番が変わるので、報告されたTrue Positiveな警告がそれまで（あるいはエディター上）と変わる可能性がある。で、これには対応しきれていないので課題。
 
 ## 5 RELATED WORK
-Program transformation has been used in various contexts to augment a procedure, technique, or system. Harman et al. introduce the idea of testability transformation [18, 19] where the goal is to transform a program to be more amenable to testing (e.g., by altering control flow) while still satisfying a chosen test adequacy criterion. Program transformation can improve fuzz testing coverage and reveal more bugs [29] and enable new crash bucketing strategies to accurately triage bugs [32]. Failure-oblivious computing [30] adds (for example) bounds checking that allow programs to execute through memory errors at runtime. We similarly develop source-to-source transformations; however, we focus on improving analysis output fidelity. Our technique also aims to improve a static procedure and thus must be fast enough to integrate into static workflows. Randomized program transformation is an approach for testing static analyzers [14] and compiler internals, and excels at finding bugs in optimization passes [15, 36]. Our approach differs generally from these in using tailored program transformations to deterministically rewrite syntax.
+Program transformation has been used in various contexts to augment a procedure, technique, or system. Harman et al. introduce the **idea of testability transformation [18, 19]** where the goal is to transform a program to be more amenable to testing (e.g., by altering control flow) while still satisfying a chosen test adequacy criterion. **Program transformation can improve fuzz testing coverage and reveal more bugs [29]** and **enable new crash bucketing strategies to accurately triage bugs [32]**. Failure-oblivious computing [30] adds (for example) bounds checking that allow programs to execute through memory errors at runtime. We similarly develop source-to-source transformations; however, we focus on improving analysis output fidelity. Our technique also aims to improve a static procedure and thus must be fast enough to integrate into static workflows. Randomized program transformation is an approach for testing static analyzers [14] and compiler internals, and excels at finding bugs in optimization passes [15, 36]. Our approach differs generally from these in using tailored program transformations to deterministically rewrite syntax.
 
-Program transformation on intermediate representations can improve analysis precision (e.g., by adding bounds on arrays [12, 23]). Recent work formalizes the impact of program transformations on static analysis in the abstract [28]; for example 3-address code transformation can introduce analyzer imprecision [26]. These works adopt a predominantly semantic view of program transformations and their influence on analysis; Cousot and Cousot develop a language-agnostic framework for reasoning about the correspondence of syntax and semantics under transformation [13]. These ideas underlie our intuition that semantic changes can improve analysis. However, abstract representations are difficult for developers to manipulate. Our work promotes changing program syntax directly as a proxy for inducing semantic changes that enhance analysis reasoning.
+プログラム変換の関連研究  
+[18, 19] testability を維持しつつ、テストに適した変換をする（CFの変更など）  
+[29] 変換によってFuzzingのカバレッジが上昇  
+[32] バグのトリアージを容易に  
+[30] 障害の発生が分かりにくいバグ（メモリ関連とか）で境界チェックなどを自動挿入  
+[14] 検体としてプログラム変換をして、静的解析器やコンパイラのバグを検出する（入力としてのプログラムをFuzzingする感じ）  
+[15, 36] 最適化パスのバグ検出に適用  
+本稿は上記の関連研究と比べて、構文的な決定的書き換えが可能なので差分あり。
 
-Various tools exist for rewriting programs, and could implement the program tailoring approach in this paper. Notable declarative tools include Coccinelle for C [24] and Refaster for Java [35]). In practice, programs are difficult to transform generically [27]. A key aspect of our work is to make automated program tailoring language-accessible. We therefore used our own recent work in efficient and declarative transformation for multiple languages [34].
+**Program transformation on intermediate representations can improve analysis precision** (e.g., by adding bounds on arrays [12, 23]). Recent work formalizes the impact of program transformations on static analysis in the abstract [28]; for example 3-address code transformation can introduce analyzer imprecision [26]. These works adopt a predominantly semantic view of program transformations and their influence on analysis; **Cousot and Cousot develop a language-agnostic framework for reasoning about the correspondence of syntax and semantics under transformation [13].** **These ideas underlie our intuition that semantic changes can improve analysis.** However, abstract representations are difficult for developers to manipulate. Our work promotes changing program syntax directly as a proxy for inducing semantic changes that enhance analysis reasoning.
 
-In practice analyzers compromise on soundness [25] and implementation tradeoffs manifest as implicit tool assumptions that are difficult to trace and modify [11]. Existing work shows that analyzer configuration options and suppression mechanisms fall short of developer needs in practice [10, 21]. Recent work by Gorogiannis et al. [17] emphasizes the value of reducing false positives over false negatives, where the objective is to never report a false positive. In terms of this work, we introduce a new program transformational approach toward false positives while sidestepping the difficulties of modifying analyzer implementations or configurations.
+中間表現への変換は分析精度の向上に役立つ。[13]は構文とセマンティクスの対応について推論する言語非依存のフレームワークを研究。ただし、抽象表現だと開発者が操作するのは難しくなる。
+
+Various tools exist for rewriting programs, and could implement the program tailoring approach in this paper. Notable declarative tools include **Coccinelle for C [24] and Refaster for Java [35]**. **In practice, programs are difficult to transform generically [27].** A key aspect of our work is to make automated program tailoring language-accessible. We therefore used our own recent work in efficient and declarative transformation for multiple languages [34].
+
+プログラム調整 (Program Tailoring) の注目度が高いツール → Coccinelle for C[24] と、Refaser for Java[35]。 ただし、プログラムを一般的に変換するのは困難[27]
+
+**In practice analyzers compromise on soundness [25] and implementation tradeoffs manifest as implicit tool assumptions that are difficult to trace and modify [11].** Existing work shows that analyzer configuration options and suppression mechanisms fall short of developer needs in practice [10, 21]. **Recent work by Gorogiannis et al. [17] emphasizes the value of reducing false positives over false negatives, where the objective is to never report a false positive.** In terms of this work, we introduce a new program transformational approach toward false positives while sidestepping the difficulties of modifying analyzer implementations or configurations.
+
+静的解析器は健全性(ここでは、FPが出ないこと)について妥協していることが多く、追跡困難な暗黙のルールを設定している。最近の研究[17]では、FNよりもFPを減らすことが価値が大きいとしている（FNを出さないように設計して、いかにFPを減らすか）。
 
 ## 6 CONCLUSION
-We introduced a new approach for effecting changes in static analysis behavior via program transformation. Our approach uses human-written templates that declaratively describe syntax transformations. Transformations are tailored to suppress spurious errors and false positives that arise due to problematic patterns and limitations in analyzer reasoning. We made the observation that analysis users have little agency over the format of analysis configuration options provided to them, but that program transformation offers a fresh primitive for leveraging influence over analysis behavior. To this end we showed that manipulating concrete syntax can resolve diverse and long-standing issues in existing analyzers, where configuration and suppression mechanisms fall short. Our evaluation presents the first study for empirically validating this program transformational technique, which we evaluated on active analyzers and large real world programs.
+**We introduced a new approach for effecting changes in static analysis behavior via program transformation. Our approach uses human-written templates that declaratively describe syntax transformations. Transformations are tailored to suppress spurious errors and false positives that arise due to problematic patterns and limitations in analyzer reasoning.** We made the observation that analysis users have little agency over the format of analysis configuration options provided to them, but that program transformation offers a fresh primitive for leveraging influence over analysis behavior. To this end we showed that manipulating concrete syntax can resolve diverse and long-standing issues in existing analyzers, where configuration and suppression mechanisms fall short. Our evaluation presents the first study for empirically validating this program transformational technique, which we evaluated on active analyzers and large real world programs.
+
+変換テンプレートは人間が宣言的に作成する。変換は解析器の制限によって発生する誤検知を抑制するために作られる（なので、解析器が完璧ならこのテンプレートは不要=FNを抑制するものではない＆効率性を上げるものではない）
